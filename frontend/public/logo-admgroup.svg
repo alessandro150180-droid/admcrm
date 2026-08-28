@@ -1,0 +1,25 @@
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ADM Group">
+  <rect x="0" y="0" width="640" height="300" fill="none" />
+
+  <text x="320" y="108" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="92" fill="#1B2A52" letter-spacing="2">ADM</text>
+
+  <g fill="#B4903F">
+    <rect x="176" y="140" width="34" height="2.5" />
+    <text x="320" y="150" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="500" font-size="30" letter-spacing="10">GROUP</text>
+    <rect x="430" y="140" width="34" height="2.5" />
+  </g>
+
+  <g fill="none" stroke="#B4903F" stroke-width="4" stroke-linecap="round">
+    <path d="M118 190 C 220 176, 340 210, 470 176" />
+  </g>
+  <g fill="#B4903F">
+    <path d="M150 188 C 158 178, 172 176, 182 182 C 172 182, 162 186, 150 188 Z" />
+    <path d="M195 186 C 205 172, 222 168, 236 176 C 224 178, 210 182, 195 186 Z" />
+    <path d="M245 183 C 258 166, 278 161, 296 170 C 280 174, 262 178, 245 183 Z" />
+    <path d="M300 178 C 315 158, 338 152, 360 162 C 340 167, 318 172, 300 178 Z" />
+    <path d="M365 174 C 382 151, 408 144, 434 155 C 410 161, 386 167, 365 174 Z" />
+    <path d="M420 168 C 435 146, 458 138, 480 148 C 460 155, 440 161, 420 168 Z" />
+  </g>
+
+  <text x="320" y="242" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="21" letter-spacing="4" fill="#B4903F">AGENZIA DI RAPPRESENTANZA</text>
+</svg>

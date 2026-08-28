@@ -1,0 +1,28 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+
+# Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Env / secrets
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Editor / OS
+.vs/
+.vscode/
+.claude/
+*.suo
+Thumbs.db
+.DS_Store
+
+# Dati locali di prova, non da versionare
+*.xlsx
+*.xls

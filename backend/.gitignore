@@ -1,0 +1,28 @@
+## .NET
+bin/
+obj/
+out/
+*.user
+*.suo
+
+## Rider / VS
+.vs/
+.idea/
+*.DotSettings.user
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+[Pp]ublish/
+
+## Secrets - non committare mai credenziali reali
+appsettings.Production.json
+**/appsettings.*.local.json
+*.pfx
+
+## Log
+*.log
+
+## OS
+.DS_Store
+Thumbs.db

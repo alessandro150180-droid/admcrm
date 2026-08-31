@@ -69,3 +69,8 @@ export function isSolaLettura(ruolo: string | undefined) {
 export function puoModificare(ruolo: string | undefined) {
   return !isSolaLettura(ruolo);
 }
+
+/** Quota di provvigione riservata alla Ditta ADM: dato riservato alla direzione, invisibile agli agenti. */
+export function puoVedereQuotaAdm(ruolo: string | undefined) {
+  return isSoloDirezione(ruolo) || isSolaLettura(ruolo);
+}

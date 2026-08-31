@@ -8,11 +8,14 @@ import { KpiCard } from "@/components/KpiCard";
 import { BarChart } from "@/components/BarChart";
 import { MultiSelectMesi } from "@/components/MultiSelectMesi";
 import { formattaPercentuale, formattaValuta, messaggioErrore, NOMI_MESI } from "@/lib/format";
+import { useAuth, puoVedereQuotaAdm } from "@/lib/auth-context";
 
 const ORA = new Date();
 const ANNI = Array.from({ length: 5 }, (_, i) => ORA.getFullYear() - i);
 
 export default function DashboardPage() {
+  const { utente } = useAuth();
+  const vedeQuotaAdm = puoVedereQuotaAdm(utente?.ruolo);
   const [mesi, setMesi] = useState<number[]>([ORA.getMonth() + 1]);
   const [anno, setAnno] = useState(ORA.getFullYear());
   const [agenteId, setAgenteId] = useState<number | "">("");
@@ -79,6 +82,8 @@ export default function DashboardPage() {
   }, [mesi, anno, agenteId, clienteId]);
 
   const totaleProvvigioni = provvigioni.reduce((somma, p) => somma + p.importoProvvigione, 0);
+  const totaleProvvigioneAdm = provvigioni.reduce((somma, p) => somma + p.importoProvvigioneAdm, 0);
+  const totaleDifferenza = totaleProvvigioneAdm - totaleProvvigioni;
 
   const provvigioniOrdinate =
     ordinamentoFatturato === null
@@ -165,13 +170,25 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="mt-6">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium text-zinc-700">
                 Fatturato e provvigioni per cliente — {etichettaPeriodo}
               </p>
-              <p className="text-sm text-zinc-500">
-                Totale provvigioni: <span className="font-medium text-zinc-800">{formattaValuta(totaleProvvigioni)}</span>
-              </p>
+              <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-zinc-500">
+                {vedeQuotaAdm && (
+                  <>
+                    <span>
+                      Totale ADM (12%): <span className="font-medium text-zinc-800">{formattaValuta(totaleProvvigioneAdm)}</span>
+                    </span>
+                    <span>
+                      Differenza: <span className="font-medium text-zinc-800">{formattaValuta(totaleDifferenza)}</span>
+                    </span>
+                  </>
+                )}
+                <span>
+                  Totale provvigioni: <span className="font-medium text-zinc-800">{formattaValuta(totaleProvvigioni)}</span>
+                </span>
+              </div>
             </div>
 
             {mesi.length === 0 ? (
@@ -189,6 +206,13 @@ export default function DashboardPage() {
                     </Th>
                     <Th>% Provvigione</Th>
                     <Th>Provvigione (€)</Th>
+                    {vedeQuotaAdm && (
+                      <>
+                        <Th>% ADM</Th>
+                        <Th>ADM (€)</Th>
+                        <Th>Differenza ADM–agente (€)</Th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -199,6 +223,13 @@ export default function DashboardPage() {
                       <Td>{formattaValuta(p.fatturato)}</Td>
                       <Td>{formattaPercentuale(p.percentualeProvvigione)}</Td>
                       <Td>{formattaValuta(p.importoProvvigione)}</Td>
+                      {vedeQuotaAdm && (
+                        <>
+                          <Td>{formattaPercentuale(p.percentualeProvvigioneAdm)}</Td>
+                          <Td>{formattaValuta(p.importoProvvigioneAdm)}</Td>
+                          <Td>{formattaValuta(p.differenzaAdmAgente)}</Td>
+                        </>
+                      )}
                     </tr>
                   ))}
                 </tbody>

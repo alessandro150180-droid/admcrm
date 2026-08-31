@@ -168,6 +168,9 @@ export interface ProvvigioneClienteDto {
   fatturato: number;
   percentualeProvvigione: number;
   importoProvvigione: number;
+  percentualeProvvigioneAdm: number;
+  importoProvvigioneAdm: number;
+  differenzaAdmAgente: number;
 }
 
 export interface ImportazioneRisultatoDto {

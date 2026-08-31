@@ -1,6 +1,7 @@
 using CucineCRM.Application.DTOs;
 using CucineCRM.Application.Interfaces;
 using CucineCRM.Domain.Entities;
+using CucineCRM.Domain.Enums;
 
 namespace CucineCRM.Application.Services;
 
@@ -9,12 +10,19 @@ public class DashboardService : IDashboardService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDataScopingService _scoping;
     private readonly IAsyncQueryExecutor _queryExecutor;
+    private readonly ICurrentUserService _currentUser;
 
-    public DashboardService(IUnitOfWork unitOfWork, IDataScopingService scoping, IAsyncQueryExecutor queryExecutor)
+    // Quota fissa riservata alla Ditta ADM su ogni fatturato cliente, indipendente dalla
+    // percentuale di provvigione (variabile per cliente) riconosciuta all'agente.
+    private const decimal PercentualeProvvigioneAdm = 12m;
+
+    public DashboardService(
+        IUnitOfWork unitOfWork, IDataScopingService scoping, IAsyncQueryExecutor queryExecutor, ICurrentUserService currentUser)
     {
         _unitOfWork = unitOfWork;
         _scoping = scoping;
         _queryExecutor = queryExecutor;
+        _currentUser = currentUser;
     }
 
     public async Task<DashboardKpiDto> GetKpiPrincipaliAsync(IReadOnlyList<int> mesi, int anno, int? agenteId = null, CancellationToken ct = default)
@@ -114,12 +122,25 @@ public class DashboardService : IDashboardService
             .Select(g => new { ClienteId = g.Key, Totale = g.Sum(o => o.Importo) }), ct))
             .ToDictionary(f => f.ClienteId, f => f.Totale);
 
+        // La quota riservata alla Ditta ADM è un dato riservato alla direzione: resta invisibile
+        // (azzerato, non solo nascosto lato frontend) per Agente e AreaManager.
+        var puoVedereQuotaAdm = _currentUser.Ruolo is RuoloUtente.Amministratore or RuoloUtente.DirettoreCommerciale or RuoloUtente.Visualizzatore;
+
         return clienti.Select(c =>
         {
             var fatturato = fatturatiPerCliente.GetValueOrDefault(c.Id, 0m);
             var importoProvvigione = Math.Round(fatturato * c.PercentualeProvvigione / 100, 2);
+
+            if (!puoVedereQuotaAdm)
+                return new ProvvigioneClienteDto(
+                    c.Id, c.RagioneSociale, c.AgenteId, c.AgenteNomeCompleto, fatturato, c.PercentualeProvvigione, importoProvvigione,
+                    0, 0, 0);
+
+            var importoProvvigioneAdm = Math.Round(fatturato * PercentualeProvvigioneAdm / 100, 2);
+            var differenzaAdmAgente = importoProvvigioneAdm - importoProvvigione;
             return new ProvvigioneClienteDto(
-                c.Id, c.RagioneSociale, c.AgenteId, c.AgenteNomeCompleto, fatturato, c.PercentualeProvvigione, importoProvvigione);
+                c.Id, c.RagioneSociale, c.AgenteId, c.AgenteNomeCompleto, fatturato, c.PercentualeProvvigione, importoProvvigione,
+                PercentualeProvvigioneAdm, importoProvvigioneAdm, differenzaAdmAgente);
         }).ToList();
     }
 

@@ -8,10 +8,13 @@ import {
   Button, EmptyState, ErrorBlock, LoadingBlock, PageHeader, Pagination, Select, Table, Td, Th, Tr,
 } from "@/components/ui";
 import { formattaData, messaggioErrore, ETICHETTE_STATO_ATTIVITA, ETICHETTE_TIPO_ATTIVITA } from "@/lib/format";
+import { useAuth, puoModificare } from "@/lib/auth-context";
 
 const STATI: StatoAttivita[] = ["DaFare", "InCorso", "Completata", "Annullata"];
 
 export default function AttivitaPage() {
+  const { utente } = useAuth();
+  const modificabile = puoModificare(utente?.ruolo);
   const [dati, setDati] = useState<{ elementi: AttivitaDto[]; pagina: number; totalePagine: number; totaleElementi: number } | null>(null);
   const [pagina, setPagina] = useState(1);
   const [stato, setStato] = useState("");
@@ -60,7 +63,7 @@ export default function AttivitaPage() {
       <PageHeader
         title="Attività"
         subtitle={dati ? `${dati.totaleElementi} attività totali` : undefined}
-        actions={<Link href="/attivita/nuovo"><Button>+ Nuova attività</Button></Link>}
+        actions={modificabile ? <Link href="/attivita/nuovo"><Button>+ Nuova attività</Button></Link> : undefined}
       />
 
       <div className="mb-4 flex items-center gap-3">
@@ -103,14 +106,20 @@ export default function AttivitaPage() {
                   <Td>{a.titolo}</Td>
                   <Td>{a.utenteNomeCompleto}</Td>
                   <Td>
-                    <Select value={a.stato} onChange={(e) => handleCambiaStato(a.id, e.target.value)} className="w-36 py-1">
-                      {STATI.map((s) => <option key={s} value={s}>{ETICHETTE_STATO_ATTIVITA[s]}</option>)}
-                    </Select>
+                    {modificabile ? (
+                      <Select value={a.stato} onChange={(e) => handleCambiaStato(a.id, e.target.value)} className="w-36 py-1">
+                        {STATI.map((s) => <option key={s} value={s}>{ETICHETTE_STATO_ATTIVITA[s]}</option>)}
+                      </Select>
+                    ) : (
+                      ETICHETTE_STATO_ATTIVITA[a.stato]
+                    )}
                   </Td>
                   <Td>
-                    <Button variant="ghost" onClick={() => handleSincronizza(a.id)} disabled={sincronizzando === a.id}>
-                      {sincronizzando === a.id ? "…" : "📅 Sincronizza"}
-                    </Button>
+                    {modificabile && (
+                      <Button variant="ghost" onClick={() => handleSincronizza(a.id)} disabled={sincronizzando === a.id}>
+                        {sincronizzando === a.id ? "…" : "📅 Sincronizza"}
+                      </Button>
+                    )}
                   </Td>
                 </tr>
               ))}

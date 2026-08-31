@@ -7,12 +7,14 @@ import type { OrdineDto, StatoOrdine } from "@/lib/types";
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Select } from "@/components/ui";
 import { formattaData, formattaValuta, messaggioErrore, ETICHETTE_STATO_ORDINE } from "@/lib/format";
 import { StatoOrdineBadge } from "@/components/StatoBadge";
+import { useAuth, puoModificare } from "@/lib/auth-context";
 
 const STATI: StatoOrdine[] = ["InAttesa", "Confermato", "InProduzione", "Spedito", "Consegnato", "Annullato"];
 
 export default function OrdineDettaglioPage() {
   const params = useParams<{ id: string }>();
   const ordineId = Number(params.id);
+  const { utente } = useAuth();
 
   const [ordine, setOrdine] = useState<OrdineDto | null>(null);
   const [caricando, setCaricando] = useState(true);
@@ -63,16 +65,18 @@ export default function OrdineDettaglioPage() {
             <p className="text-xs text-zinc-500">Stato attuale</p>
             <div className="mt-1"><StatoOrdineBadge stato={ordine.statoOrdine} /></div>
           </div>
-          <Select
-            value={ordine.statoOrdine}
-            disabled={aggiornando}
-            onChange={(e) => handleCambiaStato(e.target.value)}
-            className="w-48"
-          >
-            {STATI.map((s) => (
-              <option key={s} value={s}>{ETICHETTE_STATO_ORDINE[s]}</option>
-            ))}
-          </Select>
+          {puoModificare(utente?.ruolo) && (
+            <Select
+              value={ordine.statoOrdine}
+              disabled={aggiornando}
+              onChange={(e) => handleCambiaStato(e.target.value)}
+              className="w-48"
+            >
+              {STATI.map((s) => (
+                <option key={s} value={s}>{ETICHETTE_STATO_ORDINE[s]}</option>
+              ))}
+            </Select>
+          )}
         </div>
       </Card>
     </div>

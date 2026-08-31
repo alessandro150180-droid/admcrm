@@ -59,3 +59,13 @@ export function isDirezioneOAreaManager(ruolo: string | undefined) {
 export function isSoloDirezione(ruolo: string | undefined) {
   return ruolo === "Amministratore" || ruolo === "DirettoreCommerciale";
 }
+
+/** Ruolo di sola visualizzazione: vede tutto come l'Amministratore ma non può modificare nulla. */
+export function isSolaLettura(ruolo: string | undefined) {
+  return ruolo === "Visualizzatore";
+}
+
+/** Vero se il ruolo può creare/modificare/eliminare dati (tutti tranne il Visualizzatore). */
+export function puoModificare(ruolo: string | undefined) {
+  return !isSolaLettura(ruolo);
+}

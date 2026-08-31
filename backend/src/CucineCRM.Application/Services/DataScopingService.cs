@@ -24,6 +24,7 @@ public class DataScopingService : IDataScopingService
         {
             case RuoloUtente.Amministratore:
             case RuoloUtente.DirettoreCommerciale:
+            case RuoloUtente.Visualizzatore:
                 return null; // nessun filtro: vede tutto
 
             case RuoloUtente.AreaManager:

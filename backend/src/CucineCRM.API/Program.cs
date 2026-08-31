@@ -86,6 +86,7 @@ app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ReadOnlyRoleMiddleware>();
 
 app.MapControllers();
 

@@ -97,8 +97,12 @@ public static class DependencyInjection
 
             // Tutti i ruoli autenticati: la restrizione sui dati visibili è applicata da IDataScopingService,
             // non dalla policy di autorizzazione (che qui controlla solo "chi può chiamare l'endpoint").
+            // Il Visualizzatore è incluso qui (vede tutto come l'Amministratore) ma non nelle policy
+            // sopra: gli endpoint di sola-direzione (creazione agenti/utenti, import, audit log)
+            // restano fuori dalla sua portata. Il blocco delle scritture (POST/PUT/DELETE) per questo
+            // ruolo è applicato globalmente in Program.cs, non qui.
             options.AddPolicy("TuttiIRuoli", policy =>
-                policy.RequireRole("Amministratore", "DirettoreCommerciale", "AreaManager", "Agente"));
+                policy.RequireRole("Amministratore", "DirettoreCommerciale", "AreaManager", "Agente", "Visualizzatore"));
         });
 
         return services;

@@ -6,11 +6,13 @@ import { api } from "@/lib/api";
 import type { ClienteDto, PrioritaAttivita, TipoAttivita } from "@/lib/types";
 import { Button, ErrorBlock, Field, Input, PageHeader, Select } from "@/components/ui";
 import { ETICHETTE_PRIORITA, ETICHETTE_TIPO_ATTIVITA, messaggioErrore } from "@/lib/format";
+import { puoModificare, useAuth } from "@/lib/auth-context";
 
 const TIPI: TipoAttivita[] = ["Telefonata", "Visita", "Preventivo", "FollowUp", "Reclamo", "Campionario", "Email", "Assistenza"];
 const PRIORITA: PrioritaAttivita[] = ["Bassa", "Media", "Alta", "Urgente"];
 
 export default function NuovaAttivitaPage() {
+  const { utente } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const clienteIdPreselezionato = searchParams.get("clienteId");
@@ -37,6 +39,10 @@ export default function NuovaAttivitaPage() {
         .catch((err) => setErrore(messaggioErrore(err)));
     }
   }, [clienteIdPreselezionato]);
+
+  if (!puoModificare(utente?.ruolo)) {
+    return <ErrorBlock message="Non hai i permessi per creare una nuova attività." />;
+  }
 
   function set<K extends keyof typeof form>(campo: K, valore: string) {
     setForm((prev) => ({ ...prev, [campo]: valore }));

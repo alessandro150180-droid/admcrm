@@ -10,12 +10,14 @@ import {
 } from "@/components/ui";
 import { formattaData, formattaValuta, messaggioErrore, NOMI_MESI } from "@/lib/format";
 import { StatoOrdineBadge } from "@/components/StatoBadge";
+import { useAuth, puoModificare } from "@/lib/auth-context";
 
 const ORA = new Date();
 const ANNI = Array.from({ length: 5 }, (_, i) => ORA.getFullYear() - i);
 
 export default function OrdiniPage() {
   const router = useRouter();
+  const { utente } = useAuth();
   const [dati, setDati] = useState<{ elementi: OrdineDto[]; pagina: number; totalePagine: number; totaleElementi: number } | null>(null);
   const [pagina, setPagina] = useState(1);
   const [anno, setAnno] = useState<number | "">("");
@@ -53,7 +55,9 @@ export default function OrdiniPage() {
         actions={
           <>
             <Button variant="secondary" onClick={handleEsportaCsv}>Esporta CSV</Button>
-            <Link href="/ordini/nuovo"><Button>+ Nuovo ordine</Button></Link>
+            {puoModificare(utente?.ruolo) && (
+              <Link href="/ordini/nuovo"><Button>+ Nuovo ordine</Button></Link>
+            )}
           </>
         }
       />

@@ -5,7 +5,12 @@ public enum RuoloUtente
     Amministratore = 0,
     DirettoreCommerciale = 1,
     AreaManager = 2,
-    Agente = 3
+    Agente = 3,
+
+    // Visibilità completa su tutti gli agenti/clienti/fatturati come l'Amministratore,
+    // ma accesso di sola lettura: nessuna creazione, modifica o cancellazione è permessa
+    // (imposto a livello di middleware globale, non per singolo endpoint).
+    Visualizzatore = 4
 }
 
 public enum StatoOrdine

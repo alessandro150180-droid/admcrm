@@ -6,8 +6,10 @@ import { api } from "@/lib/api";
 import type { ClienteDto } from "@/lib/types";
 import { Button, ErrorBlock, Field, Input, PageHeader, Select } from "@/components/ui";
 import { messaggioErrore } from "@/lib/format";
+import { puoModificare, useAuth } from "@/lib/auth-context";
 
 export default function NuovoOrdinePage() {
+  const { utente } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const clienteIdPreselezionato = searchParams.get("clienteId");
@@ -33,6 +35,10 @@ export default function NuovoOrdinePage() {
         .catch((err) => setErrore(messaggioErrore(err)));
     }
   }, [clienteIdPreselezionato]);
+
+  if (!puoModificare(utente?.ruolo)) {
+    return <ErrorBlock message="Non hai i permessi per creare un nuovo ordine." />;
+  }
 
   function set<K extends keyof typeof form>(campo: K, valore: string) {
     setForm((prev) => ({ ...prev, [campo]: valore }));

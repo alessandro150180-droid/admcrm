@@ -7,7 +7,7 @@ import { api, scaricaBlob } from "@/lib/api";
 import type { ClienteDettaglioDto, ClienteDto, NotaClienteDto } from "@/lib/types";
 import { Button, Card, ErrorBlock, Input, LoadingBlock, PageHeader } from "@/components/ui";
 import { formattaData, formattaDataOra, formattaPercentuale, formattaValuta, messaggioErrore } from "@/lib/format";
-import { isDirezioneOAreaManager, useAuth } from "@/lib/auth-context";
+import { isDirezioneOAreaManager, puoModificare, useAuth } from "@/lib/auth-context";
 
 export default function ClienteDettaglioPage() {
   const params = useParams<{ id: string }>();
@@ -91,6 +91,7 @@ export default function ClienteDettaglioPage() {
   if (!dettaglio) return null;
 
   const { anagrafica } = dettaglio;
+  const modificabile = puoModificare(utente?.ruolo);
 
   return (
     <div className="max-w-4xl">
@@ -99,8 +100,12 @@ export default function ClienteDettaglioPage() {
         subtitle={`Codice ${anagrafica.codiceCliente} — Agente: ${anagrafica.agenteNomeCompleto}`}
         actions={
           <>
-            <Link href={`/ordini/nuovo?clienteId=${clienteId}`}><Button variant="secondary">+ Ordine</Button></Link>
-            <Link href={`/attivita/nuovo?clienteId=${clienteId}`}><Button variant="secondary">+ Attività</Button></Link>
+            {modificabile && (
+              <>
+                <Link href={`/ordini/nuovo?clienteId=${clienteId}`}><Button variant="secondary">+ Ordine</Button></Link>
+                <Link href={`/attivita/nuovo?clienteId=${clienteId}`}><Button variant="secondary">+ Attività</Button></Link>
+              </>
+            )}
             <Button onClick={handleEsportaPdf}>Esporta PDF</Button>
           </>
         }
@@ -154,15 +159,17 @@ export default function ClienteDettaglioPage() {
       <Card className="mt-4">
         <p className="mb-3 text-sm font-medium text-zinc-700">Note commerciali</p>
 
-        <form onSubmit={handleAggiungiNota} className="mb-4 flex gap-2">
-          <input
-            className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
-            placeholder="Aggiungi una nota…"
-            value={nuovaNota}
-            onChange={(e) => setNuovaNota(e.target.value)}
-          />
-          <Button type="submit" disabled={inviandoNota || !nuovaNota.trim()}>Aggiungi</Button>
-        </form>
+        {modificabile && (
+          <form onSubmit={handleAggiungiNota} className="mb-4 flex gap-2">
+            <input
+              className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+              placeholder="Aggiungi una nota…"
+              value={nuovaNota}
+              onChange={(e) => setNuovaNota(e.target.value)}
+            />
+            <Button type="submit" disabled={inviandoNota || !nuovaNota.trim()}>Aggiungi</Button>
+          </form>
+        )}
 
         {note.length === 0 ? (
           <p className="text-sm text-zinc-500">Nessuna nota registrata.</p>

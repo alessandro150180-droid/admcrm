@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<StoricoKPI> StoricoKPI => Set<StoricoKPI>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Notifica> Notifiche => Set<Notifica>();
+    public DbSet<Comunicazione> Comunicazioni => Set<Comunicazione>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

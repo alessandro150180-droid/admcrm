@@ -58,6 +58,7 @@ public static class DependencyInjection
         services.AddScoped<IImportazioneFatturatoMensileService, ImportazioneFatturatoMensileService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<INotificaService, NotificaService>();
+        services.AddScoped<IComunicazioneService, ComunicazioneService>();
 
         // --- Google Calendar ---
         services.Configure<GoogleOAuthOptions>(configuration.GetSection(GoogleOAuthOptions.SectionName));

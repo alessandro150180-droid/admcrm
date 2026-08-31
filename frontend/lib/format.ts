@@ -16,6 +16,12 @@ export function formattaPercentuale(valore: number): string {
   return `${valore.toFixed(1)}%`;
 }
 
+export function formattaDimensioneFile(byte: number): string {
+  if (byte < 1024) return `${byte} B`;
+  if (byte < 1024 * 1024) return `${(byte / 1024).toFixed(0)} KB`;
+  return `${(byte / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export const NOMI_MESI = [
   "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
   "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre",

@@ -24,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
         StoricoKPI = new Repository<StoricoKPI>(_context);
         AuditLogs = new Repository<AuditLog>(_context);
         Notifiche = new Repository<Notifica>(_context);
+        Comunicazioni = new Repository<Comunicazione>(_context);
     }
 
     public IRepository<Utente> Utenti { get; }
@@ -38,6 +39,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<StoricoKPI> StoricoKPI { get; }
     public IRepository<AuditLog> AuditLogs { get; }
     public IRepository<Notifica> Notifiche { get; }
+    public IRepository<Comunicazione> Comunicazioni { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken ct = default) =>
         await _context.SaveChangesAsync(ct);

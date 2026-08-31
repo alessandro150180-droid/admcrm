@@ -173,6 +173,17 @@ export interface ProvvigioneClienteDto {
   differenzaAdmAgente: number;
 }
 
+export interface ComunicazioneDto {
+  id: number;
+  titolo: string;
+  descrizione: string | null;
+  nomeFile: string;
+  tipoContenuto: string;
+  dimensioneByte: number;
+  dataPubblicazione: string;
+  utentePubblicazioneNomeCompleto: string;
+}
+
 export interface ImportazioneRisultatoDto {
   id: number;
   nomeFile: string;

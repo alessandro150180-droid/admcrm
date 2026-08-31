@@ -29,4 +29,5 @@ public class Utente : BaseEntity
     public ICollection<Attivita> Attivita { get; set; } = new List<Attivita>();
     public ICollection<NotaCliente> Note { get; set; } = new List<NotaCliente>();
     public ICollection<Importazione> Importazioni { get; set; } = new List<Importazione>();
+    public ICollection<Comunicazione> Comunicazioni { get; set; } = new List<Comunicazione>();
 }

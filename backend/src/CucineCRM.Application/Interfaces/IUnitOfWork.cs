@@ -20,6 +20,7 @@ public interface IUnitOfWork
     IRepository<StoricoKPI> StoricoKPI { get; }
     IRepository<AuditLog> AuditLogs { get; }
     IRepository<Notifica> Notifiche { get; }
+    IRepository<Comunicazione> Comunicazioni { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 }

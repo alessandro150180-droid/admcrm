@@ -4,6 +4,7 @@ import type {
   AuditLogDto,
   ClienteDettaglioDto,
   ClienteDto,
+  ComunicazioneDto,
   DashboardKpiDto,
   ImportazioneRisultatoDto,
   LoginResponseDto,
@@ -251,6 +252,19 @@ export const api = {
       formData.append("file", file);
       return apiFetch<ImportazioneRisultatoDto>("/api/importazioni/fatturato-mensile", { method: "POST", body: formData });
     },
+  },
+
+  comunicazioni: {
+    lista: () => apiFetch<ComunicazioneDto[]>("/api/comunicazioni"),
+    scarica: (id: number) => apiFetchBlob(`/api/comunicazioni/${id}/download`),
+    crea: (file: File, titolo: string, descrizione: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("titolo", titolo);
+      if (descrizione) formData.append("descrizione", descrizione);
+      return apiFetch<ComunicazioneDto>("/api/comunicazioni", { method: "POST", body: formData });
+    },
+    elimina: (id: number) => apiFetch<void>(`/api/comunicazioni/${id}`, { method: "DELETE" }),
   },
 
   notifiche: {

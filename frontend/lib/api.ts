@@ -17,7 +17,11 @@ import type {
   UtenteDto,
 } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5080";
+// In sviluppo locale NEXT_PUBLIC_API_URL è impostata in .env.local (backend su localhost:5080).
+// In produzione (Vercel) resta intenzionalmente non impostata: le chiamate usano un percorso
+// relativo, gestito dal rewrite in next.config.ts verso il backend su Render — così il browser
+// non fa mai una richiesta cross-origin ed evita il problema dei CORS header persi da Render.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const TOKEN_KEY = "cucinecrm_token";
 const UTENTE_KEY = "cucinecrm_utente";
 

@@ -19,6 +19,9 @@ frontend/out/
 .vs/
 .vscode/
 .claude/
+
+# Cache locale CLI Supabase
+backend/supabase/
 *.suo
 Thumbs.db
 .DS_Store

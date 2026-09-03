@@ -117,13 +117,20 @@ export default function ClienteDettaglioPage() {
         <Card>
           <p className="mb-3 text-sm font-medium text-zinc-700">Anagrafica</p>
           <dl className="space-y-1.5 text-sm">
-            <Riga etichetta="Partita IVA" valore={anagrafica.partitaIVA ?? "—"} />
+            <Riga etichetta="Agente" valore={anagrafica.agenteNomeCompleto} />
+            <Riga etichetta="E-mail agente" valore={anagrafica.agenteEmail || "—"} />
+            <Riga etichetta="Codice cliente" valore={anagrafica.codiceCliente} />
+            <Riga etichetta="Ragione sociale" valore={anagrafica.ragioneSociale} />
             <Riga etichetta="Indirizzo" valore={formattaIndirizzo(anagrafica)} />
+            <Riga etichetta="Città" valore={anagrafica.citta ?? "—"} />
+            <Riga etichetta="Provincia" valore={anagrafica.provincia ?? "—"} />
             <Riga etichetta="Regione" valore={anagrafica.regione ?? "—"} />
+            <Riga etichetta="Partita IVA" valore={anagrafica.partitaIVA ?? "—"} />
+            <Riga etichetta="E-mail cliente" valore={anagrafica.email ?? "—"} />
+            <Riga etichetta="Nominativo titolare" valore={anagrafica.nominativoTitolare ?? "—"} />
             <Riga etichetta="Telefono" valore={anagrafica.telefono ?? "—"} />
-            <Riga etichetta="Email" valore={anagrafica.email ?? "—"} />
+            <Riga etichetta="Provvigione" valore={formattaPercentuale(anagrafica.percentualeProvvigione)} />
             <Riga etichetta="Cliente dal" valore={formattaData(anagrafica.dataInserimento)} />
-            <Riga etichetta="Provvigione agente" valore={formattaPercentuale(anagrafica.percentualeProvvigione)} />
           </dl>
 
           {isDirezioneOAreaManager(utente?.ruolo) && (
@@ -188,11 +195,10 @@ export default function ClienteDettaglioPage() {
   );
 }
 
+// Città e provincia hanno una riga propria nella scheda: qui resta la sola via, con il CAP
+// accostato perché da solo non direbbe nulla.
 function formattaIndirizzo(c: ClienteDto): string {
-  const via = [c.indirizzo, c.cap, c.citta].filter(Boolean).join(" ");
-  const provincia = c.provincia ? `(${c.provincia})` : "";
-  const testo = [via, provincia].filter(Boolean).join(" ");
-  return testo || "—";
+  return [c.indirizzo, c.cap].filter(Boolean).join(" — ") || "—";
 }
 
 function Riga({ etichetta, valore }: { etichetta: string; valore: string }) {

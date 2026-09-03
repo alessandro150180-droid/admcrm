@@ -75,8 +75,10 @@ export interface ClienteDto {
   cap: string | null;
   telefono: string | null;
   email: string | null;
+  nominativoTitolare: string | null;
   agenteId: number;
   agenteNomeCompleto: string;
+  agenteEmail: string;
   dataInserimento: string;
   percentualeProvvigione: number;
 }

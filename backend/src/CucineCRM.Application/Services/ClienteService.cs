@@ -44,8 +44,9 @@ public class ClienteService : IClienteService
             .Take(filtri.Dimensione)
             .Select(c => new ClienteDto(
                 c.Id, c.RagioneSociale, c.CodiceCliente, c.PartitaIVA, c.Indirizzo, c.Citta,
-                c.Provincia, c.Regione, c.CAP, c.Telefono, c.Email, c.AgenteId,
-                c.Agente.Nome + " " + c.Agente.Cognome, c.DataInserimento, c.PercentualeProvvigione)), ct);
+                c.Provincia, c.Regione, c.CAP, c.Telefono, c.Email, c.NominativoTitolare, c.AgenteId,
+                c.Agente.Nome + " " + c.Agente.Cognome, c.Agente.Email,
+                c.DataInserimento, c.PercentualeProvvigione)), ct);
 
         return new PagedResult<ClienteDto>
         {
@@ -70,14 +71,7 @@ public class ClienteService : IClienteService
         var fatturatoTotale = ordiniList.Sum(o => o.Importo);
         var numeroOrdini = ordiniList.Count;
 
-        var agente = await _unitOfWork.Agenti.GetByIdAsync(cliente.AgenteId, ct);
-        var agenteNomeCompleto = agente is null ? string.Empty : $"{agente.Nome} {agente.Cognome}";
-
-        var anagrafica = new ClienteDto(
-            cliente.Id, cliente.RagioneSociale, cliente.CodiceCliente, cliente.PartitaIVA,
-            cliente.Indirizzo, cliente.Citta, cliente.Provincia, cliente.Regione, cliente.CAP,
-            cliente.Telefono, cliente.Email, cliente.AgenteId, agenteNomeCompleto, cliente.DataInserimento,
-            cliente.PercentualeProvvigione);
+        var anagrafica = await MappaConAgenteAsync(cliente, ct);
 
         return new ClienteDettaglioDto(
             Anagrafica: anagrafica,
@@ -111,6 +105,7 @@ public class ClienteService : IClienteService
             CAP = request.CAP,
             Telefono = request.Telefono,
             Email = request.Email,
+            NominativoTitolare = request.NominativoTitolare,
             AgenteId = request.AgenteId,
             DataInserimento = DateTime.UtcNow,
             PercentualeProvvigione = request.PercentualeProvvigione
@@ -119,14 +114,7 @@ public class ClienteService : IClienteService
         await _unitOfWork.Clienti.AddAsync(cliente, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        var agente = await _unitOfWork.Agenti.GetByIdAsync(cliente.AgenteId, ct);
-        var agenteNomeCompleto = agente is null ? string.Empty : $"{agente.Nome} {agente.Cognome}";
-
-        return new ClienteDto(
-            cliente.Id, cliente.RagioneSociale, cliente.CodiceCliente, cliente.PartitaIVA,
-            cliente.Indirizzo, cliente.Citta, cliente.Provincia, cliente.Regione, cliente.CAP,
-            cliente.Telefono, cliente.Email, cliente.AgenteId, agenteNomeCompleto, cliente.DataInserimento,
-            cliente.PercentualeProvvigione);
+        return await MappaConAgenteAsync(cliente, ct);
     }
 
     public async Task<ClienteDto> ImpostaProvvigioneAsync(int clienteId, ImpostaProvvigioneDto request, CancellationToken ct = default)
@@ -144,13 +132,24 @@ public class ClienteService : IClienteService
         _unitOfWork.Clienti.Update(cliente);
         await _unitOfWork.SaveChangesAsync(ct);
 
+        return await MappaConAgenteAsync(cliente, ct);
+    }
+
+    /// <summary>
+    /// Mappa un Cliente già caricato in DTO risolvendo nome ed email dell'agente. Sulle liste la
+    /// proiezione LINQ fa lo stesso lavoro lato database; qui l'agente va invece caricato a parte
+    /// perché il repository restituisce l'entità senza la navigazione Agente popolata.
+    /// </summary>
+    private async Task<ClienteDto> MappaConAgenteAsync(Cliente cliente, CancellationToken ct)
+    {
         var agente = await _unitOfWork.Agenti.GetByIdAsync(cliente.AgenteId, ct);
-        var agenteNomeCompleto = agente is null ? string.Empty : $"{agente.Nome} {agente.Cognome}";
 
         return new ClienteDto(
             cliente.Id, cliente.RagioneSociale, cliente.CodiceCliente, cliente.PartitaIVA,
             cliente.Indirizzo, cliente.Citta, cliente.Provincia, cliente.Regione, cliente.CAP,
-            cliente.Telefono, cliente.Email, cliente.AgenteId, agenteNomeCompleto, cliente.DataInserimento,
-            cliente.PercentualeProvvigione);
+            cliente.Telefono, cliente.Email, cliente.NominativoTitolare, cliente.AgenteId,
+            agente is null ? string.Empty : $"{agente.Nome} {agente.Cognome}",
+            agente?.Email ?? string.Empty,
+            cliente.DataInserimento, cliente.PercentualeProvvigione);
     }
 }

@@ -11,7 +11,7 @@ type TipoImport = "ordini" | "clienti" | "fatturato-mensile";
 
 const COLONNE: Record<TipoImport, string> = {
   ordini: "CodiceCliente, DataOrdine, Importo, NumeroCucine, NumeroElettrodomestici, NumeroComplementi, RiferimentoEsterno (opzionale)",
-  clienti: "RagioneSociale, CodiceCliente, PartitaIVA, Indirizzo, Citta, Provincia, Regione, CAP, Telefono, Email, EmailAgente",
+  clienti: "Agente, EmailAgente, CodiceCliente, RagioneSociale, Indirizzo, Citta, Provincia, Regione, PartitaIVA, EmailCliente, NominativoTitolare, Telefono, Provvigione, CAP (opzionale)",
   "fatturato-mensile": "CodiceCliente, Provvigione (opzionale), + una colonna per ogni mese con fatturato (es. \"Aprile 2026\", \"Maggio 2026\"…)",
 };
 

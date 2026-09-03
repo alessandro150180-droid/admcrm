@@ -32,14 +32,30 @@ public static class PdfExporter
                     col.Item().Text("Anagrafica").FontSize(14).Bold();
                     col.Item().Column(anagraficaCol =>
                     {
+                        // Stesso ordine di campi della scheda a video, così il PDF è confrontabile
+                        // riga per riga con quello che l'agente vede nel CRM.
+                        anagraficaCol.Item().Text($"Agente: {anagrafica.AgenteNomeCompleto}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.AgenteEmail))
+                            anagraficaCol.Item().Text($"E-mail agente: {anagrafica.AgenteEmail}");
                         anagraficaCol.Item().Text($"Codice cliente: {anagrafica.CodiceCliente}");
+                        anagraficaCol.Item().Text($"Ragione sociale: {anagrafica.RagioneSociale}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.Indirizzo))
+                            anagraficaCol.Item().Text($"Indirizzo: {anagrafica.Indirizzo}{(string.IsNullOrWhiteSpace(anagrafica.CAP) ? "" : $" — {anagrafica.CAP}")}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.Citta))
+                            anagraficaCol.Item().Text($"Città: {anagrafica.Citta}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.Provincia))
+                            anagraficaCol.Item().Text($"Provincia: {anagrafica.Provincia}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.Regione))
+                            anagraficaCol.Item().Text($"Regione: {anagrafica.Regione}");
                         if (!string.IsNullOrWhiteSpace(anagrafica.PartitaIVA))
                             anagraficaCol.Item().Text($"Partita IVA: {anagrafica.PartitaIVA}");
-                        anagraficaCol.Item().Text($"Indirizzo: {anagrafica.Indirizzo} {anagrafica.CAP} {anagrafica.Citta} ({anagrafica.Provincia}) — {anagrafica.Regione}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.Email))
+                            anagraficaCol.Item().Text($"E-mail cliente: {anagrafica.Email}");
+                        if (!string.IsNullOrWhiteSpace(anagrafica.NominativoTitolare))
+                            anagraficaCol.Item().Text($"Nominativo titolare: {anagrafica.NominativoTitolare}");
                         if (!string.IsNullOrWhiteSpace(anagrafica.Telefono))
                             anagraficaCol.Item().Text($"Telefono: {anagrafica.Telefono}");
-                        if (!string.IsNullOrWhiteSpace(anagrafica.Email))
-                            anagraficaCol.Item().Text($"Email: {anagrafica.Email}");
+                        anagraficaCol.Item().Text($"Provvigione: {anagrafica.PercentualeProvvigione:0.##}%");
                         anagraficaCol.Item().Text($"Cliente dal: {anagrafica.DataInserimento:dd/MM/yyyy}");
                     });
 

@@ -15,6 +15,10 @@ public class Cliente : BaseEntity
     public string? Telefono { get; set; }
     public string? Email { get; set; }
 
+    // Persona fisica di riferimento presso il cliente (il titolare del punto vendita): è il
+    // nominativo che gli agenti usano per il contatto diretto, distinto dalla RagioneSociale.
+    public string? NominativoTitolare { get; set; }
+
     public int AgenteId { get; set; }
     public Agente Agente { get; set; } = null!;
 

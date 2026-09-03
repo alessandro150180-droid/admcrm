@@ -126,7 +126,8 @@ public class ImportazioneClientiService : IImportazioneClientiService
             var regione = Cella(riga, "Regione");
             var cap = Cella(riga, "CAP");
             var telefono = Cella(riga, "Telefono");
-            var emailCliente = Cella(riga, "Email", "EmailCliente", "E Mail Cliente", "E-mail Cliente");
+            var emailCliente = Cella(riga, "EmailCliente", "E Mail Cliente", "E-mail Cliente", "Email");
+            var nominativoTitolare = Cella(riga, "NominativoTitolare", "Nominativo Titolare", "Titolare");
             var provvigioneTesto = Cella(riga, "PercentualeProvvigione", "Provvigione", "% Provvigione");
 
             // Se il codice cliente esiste già, aggiorna la scheda invece di scartarla come duplicato:
@@ -153,6 +154,7 @@ public class ImportazioneClientiService : IImportazioneClientiService
                 if (cap is not null) esistente.CAP = cap;
                 if (telefono is not null) esistente.Telefono = telefono;
                 if (emailCliente is not null) esistente.Email = emailCliente;
+                if (nominativoTitolare is not null) esistente.NominativoTitolare = nominativoTitolare;
                 if (provvigioneTesto is not null) esistente.PercentualeProvvigione = ParsaPercentualeProvvigione(provvigioneTesto);
 
                 _unitOfWork.Clienti.Update(esistente);
@@ -173,6 +175,7 @@ public class ImportazioneClientiService : IImportazioneClientiService
                 CAP = cap,
                 Telefono = telefono,
                 Email = emailCliente,
+                NominativoTitolare = nominativoTitolare,
                 AgenteId = agenteId,
                 DataInserimento = DateTime.UtcNow,
                 PercentualeProvvigione = ParsaPercentualeProvvigione(provvigioneTesto)

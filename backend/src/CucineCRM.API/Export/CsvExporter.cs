@@ -9,15 +9,20 @@ public static class CsvExporter
 {
     public static byte[] EsportaClienti(IEnumerable<ClienteDto> clienti)
     {
+        // L'ordine delle colonne ricalca quello dei file Excel usati in azienda, così l'export può
+        // essere ri-importato senza rimaneggiare le intestazioni.
         var sb = new StringBuilder();
-        ScriviRiga(sb, "RagioneSociale", "CodiceCliente", "PartitaIVA", "Citta", "Provincia", "Regione", "Telefono", "Email", "Agente", "DataInserimento", "PercentualeProvvigione");
+        ScriviRiga(sb, "Agente", "EmailAgente", "CodiceCliente", "RagioneSociale", "Indirizzo", "Citta",
+            "Provincia", "Regione", "PartitaIVA", "EmailCliente", "NominativoTitolare", "Telefono",
+            "PercentualeProvvigione", "DataInserimento");
 
         foreach (var c in clienti)
         {
             ScriviRiga(sb,
-                c.RagioneSociale, c.CodiceCliente, c.PartitaIVA, c.Citta, c.Provincia, c.Regione,
-                c.Telefono, c.Email, c.AgenteNomeCompleto, c.DataInserimento.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-                c.PercentualeProvvigione.ToString(CultureInfo.InvariantCulture));
+                c.AgenteNomeCompleto, c.AgenteEmail, c.CodiceCliente, c.RagioneSociale, c.Indirizzo, c.Citta,
+                c.Provincia, c.Regione, c.PartitaIVA, c.Email, c.NominativoTitolare, c.Telefono,
+                c.PercentualeProvvigione.ToString(CultureInfo.InvariantCulture),
+                c.DataInserimento.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }
 
         return new UTF8Encoding(true).GetBytes(sb.ToString());

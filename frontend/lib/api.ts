@@ -189,7 +189,7 @@ export const api = {
     crea: (payload: {
       ragioneSociale: string; codiceCliente: string; partitaIVA?: string; indirizzo?: string;
       citta?: string; provincia?: string; regione?: string; cap?: string; telefono?: string;
-      email?: string; agenteId: number; percentualeProvvigione?: number;
+      email?: string; nominativoTitolare?: string; agenteId: number; percentualeProvvigione?: number;
     }) => apiFetch<ClienteDto>("/api/clienti", { method: "POST", body: JSON.stringify(payload) }),
     note: (id: number) => apiFetch<NotaClienteDto[]>(`/api/clienti/${id}/note`),
     aggiungiNota: (id: number, testo: string) =>

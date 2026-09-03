@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
     <RootNamespace>CucineCRM.API</RootNamespace>
     <UserSecretsId>c1e1a1a0-0000-4000-8000-000000000001</UserSecretsId>
+
+    <!-- Server GC presuppone molta più RAM di quella disponibile sui piani Free di hosting
+         (es. Render, 512 MB): con Workstation GC il runtime si avvia in modo affidabile anche lì. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>

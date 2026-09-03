@@ -51,8 +51,6 @@ public static class PdfExporter
                             anagraficaCol.Item().Text($"Partita IVA: {anagrafica.PartitaIVA}");
                         if (!string.IsNullOrWhiteSpace(anagrafica.Email))
                             anagraficaCol.Item().Text($"E-mail cliente: {anagrafica.Email}");
-                        if (!string.IsNullOrWhiteSpace(anagrafica.NominativoTitolare))
-                            anagraficaCol.Item().Text($"Nominativo titolare: {anagrafica.NominativoTitolare}");
                         if (!string.IsNullOrWhiteSpace(anagrafica.Telefono))
                             anagraficaCol.Item().Text($"Telefono: {anagrafica.Telefono}");
                         anagraficaCol.Item().Text($"Provvigione: {anagrafica.PercentualeProvvigione:0.##}%");

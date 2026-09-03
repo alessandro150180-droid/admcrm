@@ -127,7 +127,6 @@ export default function ClienteDettaglioPage() {
             <Riga etichetta="Regione" valore={anagrafica.regione ?? "—"} />
             <Riga etichetta="Partita IVA" valore={anagrafica.partitaIVA ?? "—"} />
             <Riga etichetta="E-mail cliente" valore={anagrafica.email ?? "—"} />
-            <Riga etichetta="Nominativo titolare" valore={anagrafica.nominativoTitolare ?? "—"} />
             <Riga etichetta="Telefono" valore={anagrafica.telefono ?? "—"} />
             <Riga etichetta="Provvigione" valore={formattaPercentuale(anagrafica.percentualeProvvigione)} />
             <Riga etichetta="Cliente dal" valore={formattaData(anagrafica.dataInserimento)} />

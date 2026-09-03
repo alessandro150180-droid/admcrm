@@ -84,7 +84,6 @@ export default function ClientiPage() {
                 <Th>Regione</Th>
                 <Th>Partita IVA</Th>
                 <Th>E-mail cliente</Th>
-                <Th>Nominativo titolare</Th>
                 <Th>Telefono</Th>
                 <Th>Provvigione</Th>
                 <Th>Cliente dal</Th>
@@ -117,7 +116,6 @@ function Row({ cliente }: { cliente: ClienteDto }) {
       <Td>{cliente.regione ?? "—"}</Td>
       <Td>{cliente.partitaIVA ?? "—"}</Td>
       <Td>{cliente.email ?? "—"}</Td>
-      <Td>{cliente.nominativoTitolare ?? "—"}</Td>
       <Td>{cliente.telefono ?? "—"}</Td>
       <Td>{formattaPercentuale(cliente.percentualeProvvigione)}</Td>
       <Td>{formattaData(cliente.dataInserimento)}</Td>

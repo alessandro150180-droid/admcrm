@@ -14,7 +14,7 @@ export default function NuovoClientePage() {
   const [agenti, setAgenti] = useState<AgenteDto[]>([]);
   const [form, setForm] = useState({
     ragioneSociale: "", codiceCliente: "", partitaIVA: "", indirizzo: "", citta: "",
-    provincia: "", regione: "", cap: "", telefono: "", email: "", nominativoTitolare: "",
+    provincia: "", regione: "", cap: "", telefono: "", email: "",
     agenteId: "", percentualeProvvigione: "0",
   });
   const [errore, setErrore] = useState<string | null>(null);
@@ -48,7 +48,6 @@ export default function NuovoClientePage() {
         cap: form.cap || undefined,
         telefono: form.telefono || undefined,
         email: form.email || undefined,
-        nominativoTitolare: form.nominativoTitolare || undefined,
         agenteId: Number(form.agenteId),
         percentualeProvvigione: Number(form.percentualeProvvigione) || 0,
       });
@@ -93,14 +92,9 @@ export default function NuovoClientePage() {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Partita IVA">
-            <Input value={form.partitaIVA} onChange={(e) => set("partitaIVA", e.target.value)} />
-          </Field>
-          <Field label="Nominativo titolare">
-            <Input value={form.nominativoTitolare} onChange={(e) => set("nominativoTitolare", e.target.value)} />
-          </Field>
-        </div>
+        <Field label="Partita IVA">
+          <Input value={form.partitaIVA} onChange={(e) => set("partitaIVA", e.target.value)} />
+        </Field>
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Indirizzo">

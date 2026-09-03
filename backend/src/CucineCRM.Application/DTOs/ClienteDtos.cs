@@ -12,7 +12,6 @@ public record ClienteDto(
     string? CAP,
     string? Telefono,
     string? Email,
-    string? NominativoTitolare,
     int AgenteId,
     string AgenteNomeCompleto,
     string AgenteEmail,
@@ -31,7 +30,6 @@ public record CreaClienteDto(
     string? CAP,
     string? Telefono,
     string? Email,
-    string? NominativoTitolare,
     int AgenteId,
     decimal PercentualeProvvigione = 0
 );

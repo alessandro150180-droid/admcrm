@@ -44,7 +44,7 @@ public class ClienteService : IClienteService
             .Take(filtri.Dimensione)
             .Select(c => new ClienteDto(
                 c.Id, c.RagioneSociale, c.CodiceCliente, c.PartitaIVA, c.Indirizzo, c.Citta,
-                c.Provincia, c.Regione, c.CAP, c.Telefono, c.Email, c.NominativoTitolare, c.AgenteId,
+                c.Provincia, c.Regione, c.CAP, c.Telefono, c.Email, c.AgenteId,
                 c.Agente.Nome + " " + c.Agente.Cognome, c.Agente.Email,
                 c.DataInserimento, c.PercentualeProvvigione)), ct);
 
@@ -105,7 +105,6 @@ public class ClienteService : IClienteService
             CAP = request.CAP,
             Telefono = request.Telefono,
             Email = request.Email,
-            NominativoTitolare = request.NominativoTitolare,
             AgenteId = request.AgenteId,
             DataInserimento = DateTime.UtcNow,
             PercentualeProvvigione = request.PercentualeProvvigione
@@ -147,7 +146,7 @@ public class ClienteService : IClienteService
         return new ClienteDto(
             cliente.Id, cliente.RagioneSociale, cliente.CodiceCliente, cliente.PartitaIVA,
             cliente.Indirizzo, cliente.Citta, cliente.Provincia, cliente.Regione, cliente.CAP,
-            cliente.Telefono, cliente.Email, cliente.NominativoTitolare, cliente.AgenteId,
+            cliente.Telefono, cliente.Email, cliente.AgenteId,
             agente is null ? string.Empty : $"{agente.Nome} {agente.Cognome}",
             agente?.Email ?? string.Empty,
             cliente.DataInserimento, cliente.PercentualeProvvigione);

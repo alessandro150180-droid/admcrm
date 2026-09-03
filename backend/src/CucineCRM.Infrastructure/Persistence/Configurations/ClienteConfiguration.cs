@@ -16,7 +16,6 @@ public class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
         builder.Property(c => c.Provincia).HasMaxLength(50);
         builder.Property(c => c.Regione).HasMaxLength(50);
         builder.Property(c => c.CAP).HasMaxLength(10);
-        builder.Property(c => c.NominativoTitolare).HasMaxLength(150);
         builder.Property(c => c.PercentualeProvvigione).HasColumnType("decimal(5,2)").HasDefaultValue(0m);
 
         builder.HasIndex(c => c.CodiceCliente).IsUnique();

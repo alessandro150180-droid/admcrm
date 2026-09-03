@@ -278,10 +278,6 @@ namespace CucineCRM.Infrastructure.Migrations
                     b.Property<string>("Indirizzo")
                         .HasColumnType("text");
 
-                    b.Property<string>("NominativoTitolare")
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
-
                     b.Property<string>("PartitaIVA")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");

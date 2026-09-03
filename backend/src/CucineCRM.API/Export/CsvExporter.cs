@@ -13,14 +13,14 @@ public static class CsvExporter
         // essere ri-importato senza rimaneggiare le intestazioni.
         var sb = new StringBuilder();
         ScriviRiga(sb, "Agente", "EmailAgente", "CodiceCliente", "RagioneSociale", "Indirizzo", "Citta",
-            "Provincia", "Regione", "PartitaIVA", "EmailCliente", "NominativoTitolare", "Telefono",
+            "Provincia", "Regione", "PartitaIVA", "EmailCliente", "Telefono",
             "PercentualeProvvigione", "DataInserimento");
 
         foreach (var c in clienti)
         {
             ScriviRiga(sb,
                 c.AgenteNomeCompleto, c.AgenteEmail, c.CodiceCliente, c.RagioneSociale, c.Indirizzo, c.Citta,
-                c.Provincia, c.Regione, c.PartitaIVA, c.Email, c.NominativoTitolare, c.Telefono,
+                c.Provincia, c.Regione, c.PartitaIVA, c.Email, c.Telefono,
                 c.PercentualeProvvigione.ToString(CultureInfo.InvariantCulture),
                 c.DataInserimento.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }

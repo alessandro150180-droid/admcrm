@@ -8,7 +8,7 @@ import type { ClienteDto } from "@/lib/types";
 import {
   Button, EmptyState, ErrorBlock, Input, LoadingBlock, PageHeader, Pagination, Table, Td, Th, Tr,
 } from "@/components/ui";
-import { formattaData, messaggioErrore } from "@/lib/format";
+import { formattaData, formattaPercentuale, messaggioErrore } from "@/lib/format";
 import { useAuth, isDirezioneOAreaManager } from "@/lib/auth-context";
 import { scaricaBlob } from "@/lib/api";
 
@@ -76,9 +76,17 @@ export default function ClientiPage() {
               <tr>
                 <Th>Ragione sociale</Th>
                 <Th>Codice</Th>
-                <Th>Città</Th>
-                <Th>Regione</Th>
                 <Th>Agente</Th>
+                <Th>E-mail agente</Th>
+                <Th>Indirizzo</Th>
+                <Th>Città</Th>
+                <Th>Provincia</Th>
+                <Th>Regione</Th>
+                <Th>Partita IVA</Th>
+                <Th>E-mail cliente</Th>
+                <Th>Nominativo titolare</Th>
+                <Th>Telefono</Th>
+                <Th>Provvigione</Th>
                 <Th>Cliente dal</Th>
               </tr>
             </thead>
@@ -101,9 +109,17 @@ function Row({ cliente }: { cliente: ClienteDto }) {
     <Tr onClick={() => router.push(`/clienti/${cliente.id}`)}>
       <Td className="font-medium text-zinc-900">{cliente.ragioneSociale}</Td>
       <Td>{cliente.codiceCliente}</Td>
-      <Td>{cliente.citta ?? "—"}</Td>
-      <Td>{cliente.regione ?? "—"}</Td>
       <Td>{cliente.agenteNomeCompleto}</Td>
+      <Td>{cliente.agenteEmail || "—"}</Td>
+      <Td>{cliente.indirizzo ?? "—"}</Td>
+      <Td>{cliente.citta ?? "—"}</Td>
+      <Td>{cliente.provincia ?? "—"}</Td>
+      <Td>{cliente.regione ?? "—"}</Td>
+      <Td>{cliente.partitaIVA ?? "—"}</Td>
+      <Td>{cliente.email ?? "—"}</Td>
+      <Td>{cliente.nominativoTitolare ?? "—"}</Td>
+      <Td>{cliente.telefono ?? "—"}</Td>
+      <Td>{formattaPercentuale(cliente.percentualeProvvigione)}</Td>
       <Td>{formattaData(cliente.dataInserimento)}</Td>
     </Tr>
   );

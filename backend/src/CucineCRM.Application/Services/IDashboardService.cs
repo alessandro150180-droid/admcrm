@@ -9,8 +9,9 @@ public interface IDashboardService
     /// Se <paramref name="clienteId"/> è specificato, i valori sono ristretti al solo fatturato di quel cliente.</summary>
     Task<DashboardKpiDto> GetKpiPrincipaliAsync(IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default);
 
-    /// <summary>Andamento fatturato mese per mese, per il confronto 2025 vs 2026 (grafico a colonne).
-    /// Se <paramref name="clienteId"/> è specificato, la serie riporta solo il fatturato di quel cliente.</summary>
+    /// <summary>Andamento fatturato mese per mese per l'anno indicato e i due precedenti, per il
+    /// confronto anno su anno nel grafico a colonne. Se <paramref name="clienteId"/> è specificato,
+    /// la serie riporta solo il fatturato di quel cliente.</summary>
     Task<IReadOnlyList<PuntoGraficoMensileDto>> GetFatturatoMensileAsync(int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default);
 
     /// <summary>Fatturato e provvigione per cliente (portafoglio di un agente, o singolo cliente) nei mesi/anno indicati.</summary>

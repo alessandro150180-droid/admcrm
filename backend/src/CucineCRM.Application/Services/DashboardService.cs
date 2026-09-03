@@ -71,17 +71,21 @@ public class DashboardService : IDashboardService
     {
         var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, ct);
 
+        // Include anche i due anni precedenti (quando ci sono dati) per permettere il confronto
+        // anno su anno nel grafico, non solo l'anno selezionato.
+        var anniConfronto = new[] { anno, anno - 1, anno - 2 };
+
         // L'aggregazione (GroupBy + Sum) resta lato database; la proiezione al record
         // PuntoGraficoMensileDto viene fatta lato client perché EF Core/Npgsql non riesce a
         // tradurre in SQL un costruttore di record annidato dentro una Select su GroupBy.
         var totaliPerMese = await _queryExecutor.ToListAsync(ordiniQuery
-            .Where(o => o.DataOrdine.Year == anno)
-            .GroupBy(o => o.DataOrdine.Month)
-            .Select(g => new { Mese = g.Key, Totale = g.Sum(o => o.Importo) }), ct);
+            .Where(o => anniConfronto.Contains(o.DataOrdine.Year))
+            .GroupBy(o => new { o.DataOrdine.Year, o.DataOrdine.Month })
+            .Select(g => new { g.Key.Year, g.Key.Month, Totale = g.Sum(o => o.Importo) }), ct);
 
         return totaliPerMese
-            .Select(t => new PuntoGraficoMensileDto(t.Mese, anno, t.Totale))
-            .OrderBy(p => p.Mese)
+            .Select(t => new PuntoGraficoMensileDto(t.Month, t.Year, t.Totale))
+            .OrderBy(p => p.Anno).ThenBy(p => p.Mese)
             .ToList();
     }
 

@@ -27,7 +27,7 @@ public class DashboardController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Serie mensile del fatturato per il grafico a colonne "anno corrente vs anno precedente".</summary>
+    /// <summary>Serie mensile del fatturato per il grafico a colonne, anno indicato + i due precedenti.</summary>
     [HttpGet("fatturato-mensile")]
     public async Task<IActionResult> GetFatturatoMensile(
         [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)

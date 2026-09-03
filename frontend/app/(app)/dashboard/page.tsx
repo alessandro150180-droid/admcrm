@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { AgenteDto, ClienteDto, DashboardKpiDto, ProvvigioneClienteDto, PuntoGraficoMensileDto } from "@/lib/types";
-import { Card, EmptyState, ErrorBlock, LoadingBlock, PageHeader, Select, Table, Td, Th } from "@/components/ui";
+import { Badge, Card, EmptyState, ErrorBlock, LoadingBlock, PageHeader, Select, Table, Td, Th } from "@/components/ui";
 import { KpiCard } from "@/components/KpiCard";
-import { BarChart } from "@/components/BarChart";
+import { BarChart, LegendaAnni } from "@/components/BarChart";
 import { MultiSelectMesi } from "@/components/MultiSelectMesi";
 import { formattaPercentuale, formattaValuta, messaggioErrore, NOMI_MESI } from "@/lib/format";
 import { useAuth, puoVedereQuotaAdm } from "@/lib/auth-context";
@@ -80,6 +80,19 @@ export default function DashboardPage() {
       annullato = true;
     };
   }, [mesi, anno, agenteId, clienteId]);
+
+  // Confronto anno su anno nel grafico: anno selezionato + i due precedenti (quando ci sono dati).
+  const anniConfronto = [anno, anno - 1, anno - 2];
+  const totaliPerAnno = new Map<number, number>(
+    anniConfronto.map((a) => [a, serie.filter((s) => s.anno === a).reduce((somma, s) => somma + s.valore, 0)])
+  );
+  const crescitaAnnoSuAnno = anniConfronto.slice(0, -1).map((a, i) => {
+    const annoPrecedente = anniConfronto[i + 1];
+    const corrente = totaliPerAnno.get(a) ?? 0;
+    const precedente = totaliPerAnno.get(annoPrecedente) ?? 0;
+    const percentuale = precedente === 0 ? (corrente === 0 ? 0 : 100) : Math.round(((corrente - precedente) / precedente) * 1000) / 10;
+    return { anno: a, annoPrecedente, percentuale, positiva: percentuale >= 0 };
+  });
 
   const totaleProvvigioni = provvigioni.reduce((somma, p) => somma + p.importoProvvigione, 0);
   const totaleProvvigioneAdm = provvigioni.reduce((somma, p) => somma + p.importoProvvigioneAdm, 0);
@@ -165,8 +178,25 @@ export default function DashboardPage() {
           </div>
 
           <Card className="mt-6">
-            <p className="mb-4 text-sm font-medium text-zinc-700">Fatturato mensile — {anno}</p>
-            <BarChart dati={serie} />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-medium text-zinc-700">
+                Fatturato mensile — confronto {anniConfronto.join(", ")}
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                {crescitaAnnoSuAnno.map((c) => (
+                  <span key={c.anno} className="flex items-center gap-1.5 text-xs text-zinc-500">
+                    {c.anno} vs {c.annoPrecedente}
+                    <Badge tone={c.positiva ? "green" : "red"}>
+                      {c.positiva ? "▲" : "▼"} {formattaPercentuale(Math.abs(c.percentuale))}
+                    </Badge>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <BarChart dati={serie} anni={anniConfronto} />
+            <div className="mt-3">
+              <LegendaAnni anni={anniConfronto} />
+            </div>
           </Card>
 
           <Card className="mt-6">

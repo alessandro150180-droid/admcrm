@@ -25,9 +25,9 @@ public class DashboardService : IDashboardService
         _currentUser = currentUser;
     }
 
-    public async Task<DashboardKpiDto> GetKpiPrincipaliAsync(IReadOnlyList<int> mesi, int anno, int? agenteId = null, CancellationToken ct = default)
+    public async Task<DashboardKpiDto> GetKpiPrincipaliAsync(IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default)
     {
-        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, ct);
+        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, ct);
 
         var ordiniMeseCorrente = await _queryExecutor.ToListAsync(ordiniQuery
             .Where(o => mesi.Contains(o.DataOrdine.Month) && o.DataOrdine.Year == anno), ct);
@@ -51,6 +51,8 @@ public class DashboardService : IDashboardService
             clientiQuery = clientiQuery.Where(c => agentiVisibili.Contains(c.AgenteId));
         if (agenteId.HasValue)
             clientiQuery = clientiQuery.Where(c => c.AgenteId == agenteId.Value);
+        if (clienteId.HasValue)
+            clientiQuery = clientiQuery.Where(c => c.Id == clienteId.Value);
 
         var nuoviClientiCorrente = await _queryExecutor.CountAsync(
             clientiQuery.Where(c => mesi.Contains(c.DataInserimento.Month) && c.DataInserimento.Year == anno), ct);
@@ -65,9 +67,9 @@ public class DashboardService : IDashboardService
         );
     }
 
-    public async Task<IReadOnlyList<PuntoGraficoMensileDto>> GetFatturatoMensileAsync(int anno, int? agenteId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<PuntoGraficoMensileDto>> GetFatturatoMensileAsync(int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default)
     {
-        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, ct);
+        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, ct);
 
         // L'aggregazione (GroupBy + Sum) resta lato database; la proiezione al record
         // PuntoGraficoMensileDto viene fatta lato client perché EF Core/Npgsql non riesce a
@@ -148,7 +150,7 @@ public class DashboardService : IDashboardService
     /// Restituisce la query sugli Ordini già filtrata secondo lo scope di visibilità dell'utente corrente
     /// (via Cliente.AgenteId), più l'eventuale filtro esplicito per agente passato come parametro.
     /// </summary>
-    private async Task<IQueryable<Ordine>> GetOrdiniScopedQueryAsync(int? agenteId, CancellationToken ct)
+    private async Task<IQueryable<Ordine>> GetOrdiniScopedQueryAsync(int? agenteId, int? clienteId, CancellationToken ct)
     {
         var agentiVisibili = await _scoping.GetAgentiVisibiliAsync(ct);
 
@@ -159,6 +161,9 @@ public class DashboardService : IDashboardService
 
         if (agenteId.HasValue)
             query = query.Where(o => o.Cliente.AgenteId == agenteId.Value);
+
+        if (clienteId.HasValue)
+            query = query.Where(o => o.ClienteId == clienteId.Value);
 
         return query;
     }

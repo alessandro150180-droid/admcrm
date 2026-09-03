@@ -175,10 +175,10 @@ export const api = {
   },
 
   dashboard: {
-    kpi: (mesi: number[], anno: number, agenteId?: number) =>
-      apiFetch<DashboardKpiDto>(`/api/dashboard/kpi${buildQuery({ mesi, anno, agenteId })}`),
-    fatturatoMensile: (anno: number, agenteId?: number) =>
-      apiFetch<PuntoGraficoMensileDto[]>(`/api/dashboard/fatturato-mensile${buildQuery({ anno, agenteId })}`),
+    kpi: (mesi: number[], anno: number, agenteId?: number, clienteId?: number) =>
+      apiFetch<DashboardKpiDto>(`/api/dashboard/kpi${buildQuery({ mesi, anno, agenteId, clienteId })}`),
+    fatturatoMensile: (anno: number, agenteId?: number, clienteId?: number) =>
+      apiFetch<PuntoGraficoMensileDto[]>(`/api/dashboard/fatturato-mensile${buildQuery({ anno, agenteId, clienteId })}`),
     provvigioni: (mesi: number[], anno: number, agenteId?: number, clienteId?: number) =>
       apiFetch<ProvvigioneClienteDto[]>(`/api/dashboard/provvigioni${buildQuery({ mesi, anno, agenteId, clienteId })}`),
   },

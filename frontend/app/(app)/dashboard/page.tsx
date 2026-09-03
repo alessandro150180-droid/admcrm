@@ -63,8 +63,8 @@ export default function DashboardPage() {
     }
 
     Promise.all([
-      api.dashboard.kpi(mesi, anno, agenteId || undefined),
-      api.dashboard.fatturatoMensile(anno, agenteId || undefined),
+      api.dashboard.kpi(mesi, anno, agenteId || undefined, clienteId || undefined),
+      api.dashboard.fatturatoMensile(anno, agenteId || undefined, clienteId || undefined),
       api.dashboard.provvigioni(mesi, anno, agenteId || undefined, clienteId || undefined),
     ])
       .then(([kpiRisposta, serieRisposta, provvigioniRisposta]) => {

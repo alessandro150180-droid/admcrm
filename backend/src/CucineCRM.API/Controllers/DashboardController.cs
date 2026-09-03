@@ -21,18 +21,18 @@ public class DashboardController : ControllerBase
     /// valori sono la somma sull'insieme selezionato.</summary>
     [HttpGet("kpi")]
     public async Task<IActionResult> GetKpi(
-        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, CancellationToken ct)
+        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)
     {
-        var result = await _dashboardService.GetKpiPrincipaliAsync(mesi, anno, agenteId, ct);
+        var result = await _dashboardService.GetKpiPrincipaliAsync(mesi, anno, agenteId, clienteId, ct);
         return Ok(result);
     }
 
     /// <summary>Serie mensile del fatturato per il grafico a colonne "anno corrente vs anno precedente".</summary>
     [HttpGet("fatturato-mensile")]
     public async Task<IActionResult> GetFatturatoMensile(
-        [FromQuery] int anno, [FromQuery] int? agenteId, CancellationToken ct)
+        [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)
     {
-        var result = await _dashboardService.GetFatturatoMensileAsync(anno, agenteId, ct);
+        var result = await _dashboardService.GetFatturatoMensileAsync(anno, agenteId, clienteId, ct);
         return Ok(result);
     }
 

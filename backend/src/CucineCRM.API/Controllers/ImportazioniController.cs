@@ -75,4 +75,16 @@ public class ImportazioniController : ControllerBase
         var result = await _importazioneFatturatoMensileService.ImportaFatturatoMensileAsync(stream, file.FileName, ct);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Elimina gli ordini sintetici generati dall'import fatturato mensile per il mese/anno indicato
+    /// (soft-delete, lo storico resta in DB). Serve per correggere un import errato: dopo l'eliminazione
+    /// si può richiamare POST fatturato-mensile con il file corretto per ricreare solo quel periodo.
+    /// </summary>
+    [HttpDelete("fatturato-mensile/{anno:int}/{mese:int}")]
+    public async Task<IActionResult> EliminaFatturatoMensile(int anno, int mese, CancellationToken ct)
+    {
+        var eliminati = await _importazioneFatturatoMensileService.EliminaFatturatoMensileAsync(anno, mese, ct);
+        return Ok(new { ordiniEliminati = eliminati });
+    }
 }

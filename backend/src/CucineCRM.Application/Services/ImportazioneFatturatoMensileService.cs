@@ -187,6 +187,27 @@ public class ImportazioneFatturatoMensileService : IImportazioneFatturatoMensile
             importazione.Completata, importazione.LogEsito);
     }
 
+    public async Task<int> EliminaFatturatoMensileAsync(int anno, int mese, CancellationToken ct = default)
+    {
+        // Il suffisso "-{anno}{mese}" del RiferimentoEsterno (assegnato in fase di import, vedi sopra)
+        // identifica univocamente gli ordini sintetici di quel periodo: non tocca eventuali ordini
+        // manuali dello stesso mese, che non hanno questo formato di riferimento.
+        var suffisso = $"-{anno}{mese:D2}";
+
+        var daEliminare = await _queryExecutor.ToListAsync(_unitOfWork.Ordini.Query()
+            .Where(o => o.RiferimentoEsterno != null
+                && o.RiferimentoEsterno.StartsWith("FATT-")
+                && o.RiferimentoEsterno.EndsWith(suffisso)), ct);
+
+        foreach (var ordine in daEliminare)
+            _unitOfWork.Ordini.SoftDelete(ordine);
+
+        if (daEliminare.Count > 0)
+            await _unitOfWork.SaveChangesAsync(ct);
+
+        return daEliminare.Count;
+    }
+
     private static (int Anno, int Mese)? ProvaEstraiMeseAnno(string intestazione)
     {
         var parti = intestazione.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);

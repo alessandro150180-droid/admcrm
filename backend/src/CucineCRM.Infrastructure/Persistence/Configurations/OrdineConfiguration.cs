@@ -14,8 +14,11 @@ public class OrdineConfiguration : IEntityTypeConfiguration<Ordine>
         builder.Property(o => o.StatoOrdine).HasConversion<string>().HasMaxLength(30);
         builder.Property(o => o.RiferimentoEsterno).HasMaxLength(100);
 
-        // Fondamentale per l'import Excel: evita duplicati sullo stesso riferimento esterno
-        builder.HasIndex(o => o.RiferimentoEsterno).IsUnique().HasFilter("\"RiferimentoEsterno\" IS NOT NULL");
+        // Fondamentale per l'import Excel: evita duplicati sullo stesso riferimento esterno.
+        // Esclude le righe soft-eliminate (Eliminato = true): altrimenti cancellare un import errato
+        // e ricaricare lo stesso file per correggerlo fallirebbe con un conflitto di univocità contro
+        // la riga vecchia, ancora presente in tabella ma nascosta dal query filter globale.
+        builder.HasIndex(o => o.RiferimentoEsterno).IsUnique().HasFilter("\"RiferimentoEsterno\" IS NOT NULL AND \"Eliminato\" = false");
 
         // Indici usati dalle dashboard per aggregazioni per data/cliente
         builder.HasIndex(o => o.DataOrdine);

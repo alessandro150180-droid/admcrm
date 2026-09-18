@@ -19,7 +19,6 @@ const VOCI: VoceMenu[] = [
   { href: "/attivita", label: "Attività" },
   { href: "/obiettivi", label: "Obiettivi di vendita" },
   { href: "/comunicazioni", label: "Comunicazioni" },
-  { href: "/chat-ai", label: "ChatAI" },
   { href: "/import", label: "Import Excel", visibile: isSoloDirezione },
   { href: "/notifiche", label: "Notifiche" },
   { href: "/audit-log", label: "Audit log", visibile: isSoloDirezione },

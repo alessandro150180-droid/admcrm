@@ -232,15 +232,6 @@ export interface AuditLogDto {
   dataCreazione: string;
 }
 
-export interface ChatAiMessaggioDto {
-  ruolo: "utente" | "assistente";
-  testo: string;
-}
-
-export interface ChatAiRispostaDto {
-  testo: string;
-}
-
 export interface ApiErrorBody {
   title?: string;
   status?: number;

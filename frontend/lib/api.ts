@@ -2,8 +2,6 @@ import type {
   AgenteDto,
   AttivitaDto,
   AuditLogDto,
-  ChatAiMessaggioDto,
-  ChatAiRispostaDto,
   ClienteDettaglioDto,
   ClienteDto,
   ComunicazioneDto,
@@ -290,14 +288,6 @@ export const api = {
   auditLog: {
     lista: (filtri: { pagina?: number; dimensione?: number; nomeEntita?: string; entitaId?: number; utenteId?: number }) =>
       apiFetch<PagedResult<AuditLogDto>>(`/api/auditlog${buildQuery(filtri)}`),
-  },
-
-  chatAi: {
-    messaggio: (testo: string, cronologia: ChatAiMessaggioDto[]) =>
-      apiFetch<ChatAiRispostaDto>("/api/chat-ai/messaggio", {
-        method: "POST",
-        body: JSON.stringify({ testo, cronologia }),
-      }),
   },
 
   googleCalendar: {

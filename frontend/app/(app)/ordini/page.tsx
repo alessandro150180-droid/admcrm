@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, scaricaBlob } from "@/lib/api";
-import type { OrdineDto } from "@/lib/types";
+import type { FornitoreDto, OrdineDto } from "@/lib/types";
 import {
   Button, EmptyState, ErrorBlock, LoadingBlock, PageHeader, Pagination, Select, Table, Td, Th, Tr,
 } from "@/components/ui";
 import { formattaData, formattaValuta, messaggioErrore, NOMI_MESI } from "@/lib/format";
 import { StatoOrdineBadge } from "@/components/StatoBadge";
+import { MultiSelectFornitori } from "@/components/MultiSelectFornitori";
 import { useAuth, puoModificare } from "@/lib/auth-context";
 
 const ORA = new Date();
@@ -22,25 +23,31 @@ export default function OrdiniPage() {
   const [pagina, setPagina] = useState(1);
   const [anno, setAnno] = useState<number | "">("");
   const [mese, setMese] = useState<number | "">("");
+  const [fornitoreIds, setFornitoreIds] = useState<number[]>([]);
+  const [fornitori, setFornitori] = useState<FornitoreDto[]>([]);
   const [caricando, setCaricando] = useState(true);
   const [errore, setErrore] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.fornitori.lista().then(setFornitori).catch((err) => setErrore(messaggioErrore(err)));
+  }, []);
 
   useEffect(() => {
     let annullato = false;
     setCaricando(true);
     api.ordini
-      .lista({ pagina, dimensione: 20, anno: anno || undefined, mese: mese || undefined })
+      .lista({ pagina, dimensione: 20, anno: anno || undefined, mese: mese || undefined, fornitoreIds: fornitoreIds.length > 0 ? fornitoreIds : undefined })
       .then((r) => !annullato && setDati(r))
       .catch((err) => !annullato && setErrore(messaggioErrore(err)))
       .finally(() => !annullato && setCaricando(false));
     return () => {
       annullato = true;
     };
-  }, [pagina, anno, mese]);
+  }, [pagina, anno, mese, fornitoreIds]);
 
   async function handleEsportaCsv() {
     try {
-      const blob = await api.ordini.esportaCsv({ anno: anno || undefined, mese: mese || undefined });
+      const blob = await api.ordini.esportaCsv({ anno: anno || undefined, mese: mese || undefined, fornitoreIds: fornitoreIds.length > 0 ? fornitoreIds : undefined });
       scaricaBlob(blob, "ordini.csv");
     } catch (err) {
       setErrore(messaggioErrore(err));
@@ -71,6 +78,12 @@ export default function OrdiniPage() {
           <option value="">Tutti gli anni</option>
           {ANNI.map((a) => <option key={a} value={a}>{a}</option>)}
         </Select>
+        <MultiSelectFornitori
+          fornitori={fornitori}
+          selezionati={fornitoreIds}
+          onChange={(ids) => { setPagina(1); setFornitoreIds(ids); }}
+          className="w-44"
+        />
       </div>
 
       {errore && <ErrorBlock message={errore} />}
@@ -86,6 +99,7 @@ export default function OrdiniPage() {
               <tr>
                 <Th>Data</Th>
                 <Th>Cliente</Th>
+                <Th>Fornitore</Th>
                 <Th>Importo</Th>
                 <Th>Cucine</Th>
                 <Th>Stato</Th>
@@ -97,6 +111,7 @@ export default function OrdiniPage() {
                 <Tr key={o.id} onClick={() => router.push(`/ordini/${o.id}`)}>
                   <Td>{formattaData(o.dataOrdine)}</Td>
                   <Td className="font-medium text-zinc-900">{o.clienteRagioneSociale}</Td>
+                  <Td>{o.fornitoreNome}</Td>
                   <Td>{formattaValuta(o.importo)}</Td>
                   <Td>{o.numeroCucine}</Td>
                   <Td><StatoOrdineBadge stato={o.statoOrdine} /></Td>

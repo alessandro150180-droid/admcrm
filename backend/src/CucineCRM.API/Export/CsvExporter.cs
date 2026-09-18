@@ -31,12 +31,12 @@ public static class CsvExporter
     public static byte[] EsportaOrdini(IEnumerable<OrdineDto> ordini)
     {
         var sb = new StringBuilder();
-        ScriviRiga(sb, "DataOrdine", "Cliente", "Importo", "NumeroCucine", "NumeroElettrodomestici", "NumeroComplementi", "Stato", "RiferimentoEsterno");
+        ScriviRiga(sb, "DataOrdine", "Cliente", "Fornitore", "Importo", "NumeroCucine", "NumeroElettrodomestici", "NumeroComplementi", "Stato", "RiferimentoEsterno");
 
         foreach (var o in ordini)
         {
             ScriviRiga(sb,
-                o.DataOrdine.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), o.ClienteRagioneSociale,
+                o.DataOrdine.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), o.ClienteRagioneSociale, o.FornitoreNome,
                 o.Importo.ToString(CultureInfo.InvariantCulture), o.NumeroCucine.ToString(CultureInfo.InvariantCulture),
                 o.NumeroElettrodomestici.ToString(CultureInfo.InvariantCulture), o.NumeroComplementi.ToString(CultureInfo.InvariantCulture),
                 o.StatoOrdine.ToString(), o.RiferimentoEsterno);

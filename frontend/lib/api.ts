@@ -2,10 +2,13 @@ import type {
   AgenteDto,
   AttivitaDto,
   AuditLogDto,
+  ChatAiMessaggioDto,
+  ChatAiRispostaDto,
   ClienteDettaglioDto,
   ClienteDto,
   ComunicazioneDto,
   DashboardKpiDto,
+  FornitoreDto,
   ImportazioneRisultatoDto,
   LoginResponseDto,
   NotaClienteDto,
@@ -149,6 +152,7 @@ export interface FiltriLista {
   agenteId?: number;
   anno?: number;
   mese?: number;
+  fornitoreIds?: number[];
 }
 
 export const api = {
@@ -175,12 +179,17 @@ export const api = {
   },
 
   dashboard: {
-    kpi: (mesi: number[], anno: number, agenteId?: number, clienteId?: number) =>
-      apiFetch<DashboardKpiDto>(`/api/dashboard/kpi${buildQuery({ mesi, anno, agenteId, clienteId })}`),
-    fatturatoMensile: (anno: number, agenteId?: number, clienteId?: number) =>
-      apiFetch<PuntoGraficoMensileDto[]>(`/api/dashboard/fatturato-mensile${buildQuery({ anno, agenteId, clienteId })}`),
-    provvigioni: (mesi: number[], anno: number, agenteId?: number, clienteId?: number) =>
-      apiFetch<ProvvigioneClienteDto[]>(`/api/dashboard/provvigioni${buildQuery({ mesi, anno, agenteId, clienteId })}`),
+    kpi: (mesi: number[], anno: number, agenteId?: number, clienteId?: number, fornitoreIds?: number[]) =>
+      apiFetch<DashboardKpiDto>(`/api/dashboard/kpi${buildQuery({ mesi, anno, agenteId, clienteId, fornitoreIds })}`),
+    fatturatoMensile: (anno: number, agenteId?: number, clienteId?: number, fornitoreIds?: number[]) =>
+      apiFetch<PuntoGraficoMensileDto[]>(`/api/dashboard/fatturato-mensile${buildQuery({ anno, agenteId, clienteId, fornitoreIds })}`),
+    provvigioni: (mesi: number[], anno: number, agenteId?: number, clienteId?: number, fornitoreIds?: number[]) =>
+      apiFetch<ProvvigioneClienteDto[]>(`/api/dashboard/provvigioni${buildQuery({ mesi, anno, agenteId, clienteId, fornitoreIds })}`),
+  },
+
+  fornitori: {
+    lista: () => apiFetch<FornitoreDto[]>("/api/fornitori"),
+    crea: (nome: string) => apiFetch<FornitoreDto>("/api/fornitori", { method: "POST", body: JSON.stringify({ nome }) }),
   },
 
   clienti: {
@@ -205,7 +214,7 @@ export const api = {
     lista: (filtri: FiltriLista) => apiFetch<PagedResult<OrdineDto>>(`/api/ordini${buildQuery(filtri)}`),
     dettaglio: (id: number) => apiFetch<OrdineDto>(`/api/ordini/${id}`),
     crea: (payload: {
-      clienteId: number; dataOrdine: string; importo: number; numeroCucine: number;
+      clienteId: number; fornitoreId: number; dataOrdine: string; importo: number; numeroCucine: number;
       numeroElettrodomestici: number; numeroComplementi: number; riferimentoEsterno?: string;
     }) => apiFetch<OrdineDto>("/api/ordini", { method: "POST", body: JSON.stringify(payload) }),
     aggiornaStato: (id: number, nuovoStato: string) =>
@@ -235,10 +244,11 @@ export const api = {
   },
 
   importazioni: {
-    importaOrdini: (file: File, periodoCompetenza: string) => {
+    importaOrdini: (file: File, periodoCompetenza: string, fornitoreId: number) => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("periodoCompetenza", periodoCompetenza);
+      formData.append("fornitoreId", String(fornitoreId));
       return apiFetch<ImportazioneRisultatoDto>("/api/importazioni/ordini", { method: "POST", body: formData });
     },
     importaClienti: (file: File, periodoCompetenza: string) => {
@@ -247,11 +257,14 @@ export const api = {
       formData.append("periodoCompetenza", periodoCompetenza);
       return apiFetch<ImportazioneRisultatoDto>("/api/importazioni/clienti", { method: "POST", body: formData });
     },
-    importaFatturatoMensile: (file: File) => {
+    importaFatturatoMensile: (file: File, fornitoreId: number) => {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("fornitoreId", String(fornitoreId));
       return apiFetch<ImportazioneRisultatoDto>("/api/importazioni/fatturato-mensile", { method: "POST", body: formData });
     },
+    eliminaFatturatoMensile: (anno: number, mese: number, fornitoreId: number) =>
+      apiFetch<{ ordiniEliminati: number }>(`/api/importazioni/fatturato-mensile/${anno}/${mese}/${fornitoreId}`, { method: "DELETE" }),
   },
 
   comunicazioni: {
@@ -277,6 +290,14 @@ export const api = {
   auditLog: {
     lista: (filtri: { pagina?: number; dimensione?: number; nomeEntita?: string; entitaId?: number; utenteId?: number }) =>
       apiFetch<PagedResult<AuditLogDto>>(`/api/auditlog${buildQuery(filtri)}`),
+  },
+
+  chatAi: {
+    messaggio: (testo: string, cronologia: ChatAiMessaggioDto[]) =>
+      apiFetch<ChatAiRispostaDto>("/api/chat-ai/messaggio", {
+        method: "POST",
+        body: JSON.stringify({ testo, cronologia }),
+      }),
   },
 
   googleCalendar: {

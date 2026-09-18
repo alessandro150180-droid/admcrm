@@ -30,10 +30,13 @@ public class ImportazioneFatturatoMensileService : IImportazioneFatturatoMensile
         _currentUser = currentUser;
     }
 
-    public async Task<ImportazioneRisultatoDto> ImportaFatturatoMensileAsync(Stream file, string nomeFile, CancellationToken ct = default)
+    public async Task<ImportazioneRisultatoDto> ImportaFatturatoMensileAsync(Stream file, string nomeFile, int fornitoreId, CancellationToken ct = default)
     {
         var utenteId = _currentUser.UtenteId
             ?? throw new AuthenticationException("Utente non autenticato.");
+
+        if (await _unitOfWork.Fornitori.GetByIdAsync(fornitoreId, ct) is null)
+            throw new ValidationAppException($"Nessun fornitore con id {fornitoreId}.");
 
         var righe = _spreadsheetReader.LeggiRighe(file);
 
@@ -96,7 +99,9 @@ public class ImportazioneFatturatoMensileService : IImportazioneFatturatoMensile
                 if (!TryParseImporto(testoValore, out var importo) || importo == 0)
                     continue; // nessun fatturato quel mese: non è un errore, semplicemente non c'è nulla da importare
 
-                var riferimento = $"FATT-{codiceCliente}-{anno}{mese:D2}";
+                // Include il fornitore nel riferimento: lo stesso cliente/mese può avere fatturato
+                // separato per più fornitori (Nobilia, NobiSmart, ...), senza scontrarsi sull'univocità.
+                var riferimento = $"FATT-F{fornitoreId}-{codiceCliente}-{anno}{mese:D2}";
                 if (riferimentiEsistenti.Contains(riferimento))
                 {
                     meseDuplicati++;
@@ -106,6 +111,7 @@ public class ImportazioneFatturatoMensileService : IImportazioneFatturatoMensile
                 nuoviOrdini.Add(new Ordine
                 {
                     ClienteId = clienteId,
+                    FornitoreId = fornitoreId,
                     DataOrdine = new DateTime(anno, mese, 1, 0, 0, 0, DateTimeKind.Utc),
                     Importo = importo,
                     StatoOrdine = StatoOrdine.Consegnato, // fatturato storico già realizzato, non un ordine in corso
@@ -187,16 +193,17 @@ public class ImportazioneFatturatoMensileService : IImportazioneFatturatoMensile
             importazione.Completata, importazione.LogEsito);
     }
 
-    public async Task<int> EliminaFatturatoMensileAsync(int anno, int mese, CancellationToken ct = default)
+    public async Task<int> EliminaFatturatoMensileAsync(int anno, int mese, int fornitoreId, CancellationToken ct = default)
     {
-        // Il suffisso "-{anno}{mese}" del RiferimentoEsterno (assegnato in fase di import, vedi sopra)
-        // identifica univocamente gli ordini sintetici di quel periodo: non tocca eventuali ordini
-        // manuali dello stesso mese, che non hanno questo formato di riferimento.
+        // Prefisso "FATT-F{fornitoreId}-" + suffisso "-{anno}{mese}" identificano univocamente gli
+        // ordini sintetici di quel fornitore/periodo (assegnati in fase di import, vedi sopra): non
+        // toccano eventuali ordini manuali o di altri fornitori nello stesso mese.
+        var prefisso = $"FATT-F{fornitoreId}-";
         var suffisso = $"-{anno}{mese:D2}";
 
         var daEliminare = await _queryExecutor.ToListAsync(_unitOfWork.Ordini.Query()
             .Where(o => o.RiferimentoEsterno != null
-                && o.RiferimentoEsterno.StartsWith("FATT-")
+                && o.RiferimentoEsterno.StartsWith(prefisso)
                 && o.RiferimentoEsterno.EndsWith(suffisso)), ct);
 
         foreach (var ordine in daEliminare)

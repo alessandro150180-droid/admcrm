@@ -16,6 +16,7 @@ public class UnitOfWork : IUnitOfWork
         Agenti = new Repository<Agente>(_context);
         Clienti = new Repository<Cliente>(_context);
         Ordini = new Repository<Ordine>(_context);
+        Fornitori = new Repository<Fornitore>(_context);
         Importazioni = new Repository<Importazione>(_context);
         Attivita = new Repository<Attivita>(_context);
         NoteCliente = new Repository<NotaCliente>(_context);
@@ -31,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Agente> Agenti { get; }
     public IRepository<Cliente> Clienti { get; }
     public IRepository<Ordine> Ordini { get; }
+    public IRepository<Fornitore> Fornitori { get; }
     public IRepository<Importazione> Importazioni { get; }
     public IRepository<Attivita> Attivita { get; }
     public IRepository<NotaCliente> NoteCliente { get; }

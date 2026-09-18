@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import type { AgenteDto, ClienteDto, DashboardKpiDto, ProvvigioneClienteDto, PuntoGraficoMensileDto } from "@/lib/types";
+import type { AgenteDto, ClienteDto, DashboardKpiDto, FornitoreDto, ProvvigioneClienteDto, PuntoGraficoMensileDto } from "@/lib/types";
 import { Badge, Card, EmptyState, ErrorBlock, LoadingBlock, PageHeader, Select, Table, Td, Th } from "@/components/ui";
 import { KpiCard } from "@/components/KpiCard";
 import { BarChart, LegendaAnni } from "@/components/BarChart";
 import { MultiSelectMesi } from "@/components/MultiSelectMesi";
+import { MultiSelectFornitori } from "@/components/MultiSelectFornitori";
 import { formattaPercentuale, formattaValuta, messaggioErrore, NOMI_MESI } from "@/lib/format";
 import { useAuth, puoVedereQuotaAdm } from "@/lib/auth-context";
 
@@ -20,9 +21,11 @@ export default function DashboardPage() {
   const [anno, setAnno] = useState(ORA.getFullYear());
   const [agenteId, setAgenteId] = useState<number | "">("");
   const [clienteId, setClienteId] = useState<number | "">("");
+  const [fornitoreIds, setFornitoreIds] = useState<number[]>([]);
 
   const [agenti, setAgenti] = useState<AgenteDto[]>([]);
   const [clienti, setClienti] = useState<ClienteDto[]>([]);
+  const [fornitori, setFornitori] = useState<FornitoreDto[]>([]);
 
   const [kpi, setKpi] = useState<DashboardKpiDto | null>(null);
   const [serie, setSerie] = useState<PuntoGraficoMensileDto[]>([]);
@@ -32,9 +35,10 @@ export default function DashboardPage() {
   const [errore, setErrore] = useState<string | null>(null);
   const [ordinamentoFatturato, setOrdinamentoFatturato] = useState<"asc" | "desc" | null>(null);
 
-  // Elenco agenti per il filtro: caricato una sola volta.
+  // Elenco agenti e fornitori per i filtri: caricati una sola volta.
   useEffect(() => {
     api.agenti.lista().then(setAgenti).catch((err) => setErrore(messaggioErrore(err)));
+    api.fornitori.lista().then(setFornitori).catch((err) => setErrore(messaggioErrore(err)));
   }, []);
 
   // Elenco clienti per il filtro "Cliente": ristretto all'agente selezionato, se presente.
@@ -62,10 +66,11 @@ export default function DashboardPage() {
       return;
     }
 
+    const fornitoreIdsAttivi = fornitoreIds.length > 0 ? fornitoreIds : undefined;
     Promise.all([
-      api.dashboard.kpi(mesi, anno, agenteId || undefined, clienteId || undefined),
-      api.dashboard.fatturatoMensile(anno, agenteId || undefined, clienteId || undefined),
-      api.dashboard.provvigioni(mesi, anno, agenteId || undefined, clienteId || undefined),
+      api.dashboard.kpi(mesi, anno, agenteId || undefined, clienteId || undefined, fornitoreIdsAttivi),
+      api.dashboard.fatturatoMensile(anno, agenteId || undefined, clienteId || undefined, fornitoreIdsAttivi),
+      api.dashboard.provvigioni(mesi, anno, agenteId || undefined, clienteId || undefined, fornitoreIdsAttivi),
     ])
       .then(([kpiRisposta, serieRisposta, provvigioniRisposta]) => {
         if (annullato) return;
@@ -79,7 +84,7 @@ export default function DashboardPage() {
     return () => {
       annullato = true;
     };
-  }, [mesi, anno, agenteId, clienteId]);
+  }, [mesi, anno, agenteId, clienteId, fornitoreIds]);
 
   // Confronto anno su anno nel grafico: anno selezionato + i due precedenti (quando ci sono dati).
   const anniConfronto = [anno, anno - 1, anno - 2];
@@ -153,6 +158,7 @@ export default function DashboardPage() {
               <option value="">Tutto il portafoglio</option>
               {clienti.map((c) => <option key={c.id} value={c.id}>{c.ragioneSociale}</option>)}
             </Select>
+            <MultiSelectFornitori fornitori={fornitori} selezionati={fornitoreIds} onChange={setFornitoreIds} className="w-44" />
             <MultiSelectMesi mesiSelezionati={mesi} onChange={setMesi} className="w-40" />
             <Select value={anno} onChange={(e) => setAnno(Number(e.target.value))} className="w-24">
               {ANNI.map((a) => (

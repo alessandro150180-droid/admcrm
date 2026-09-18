@@ -21,27 +21,30 @@ public class DashboardController : ControllerBase
     /// valori sono la somma sull'insieme selezionato.</summary>
     [HttpGet("kpi")]
     public async Task<IActionResult> GetKpi(
-        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)
+        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId,
+        [FromQuery] int[]? fornitoreIds, CancellationToken ct)
     {
-        var result = await _dashboardService.GetKpiPrincipaliAsync(mesi, anno, agenteId, clienteId, ct);
+        var result = await _dashboardService.GetKpiPrincipaliAsync(mesi, anno, agenteId, clienteId, fornitoreIds, ct);
         return Ok(result);
     }
 
     /// <summary>Serie mensile del fatturato per il grafico a colonne, anno indicato + i due precedenti.</summary>
     [HttpGet("fatturato-mensile")]
     public async Task<IActionResult> GetFatturatoMensile(
-        [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)
+        [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId,
+        [FromQuery] int[]? fornitoreIds, CancellationToken ct)
     {
-        var result = await _dashboardService.GetFatturatoMensileAsync(anno, agenteId, clienteId, ct);
+        var result = await _dashboardService.GetFatturatoMensileAsync(anno, agenteId, clienteId, fornitoreIds, ct);
         return Ok(result);
     }
 
     /// <summary>Fatturato e provvigione per cliente: portafoglio di un agente, o singolo cliente se clienteId è specificato.</summary>
     [HttpGet("provvigioni")]
     public async Task<IActionResult> GetProvvigioni(
-        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId, CancellationToken ct)
+        [FromQuery] int[] mesi, [FromQuery] int anno, [FromQuery] int? agenteId, [FromQuery] int? clienteId,
+        [FromQuery] int[]? fornitoreIds, CancellationToken ct)
     {
-        var result = await _dashboardService.GetProvvigioniPerClienteAsync(mesi, anno, agenteId, clienteId, ct);
+        var result = await _dashboardService.GetProvvigioniPerClienteAsync(mesi, anno, agenteId, clienteId, fornitoreIds, ct);
         return Ok(result);
     }
 }

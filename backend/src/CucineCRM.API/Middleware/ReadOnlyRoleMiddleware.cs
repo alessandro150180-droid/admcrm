@@ -21,8 +21,9 @@ public class ReadOnlyRoleMiddleware
     }
 
     // Il cambio password riguarda il proprio account, non i dati del CRM: resta permesso
-    // anche per il ruolo di sola lettura.
-    private static readonly string[] PercorsiConsentiti = { "/api/auth/cambia-password" };
+    // anche per il ruolo di sola lettura. Anche la ChatAI è di fatto sola lettura (interroga i
+    // dati, non li modifica) nonostante usi POST per inviare il messaggio.
+    private static readonly string[] PercorsiConsentiti = { "/api/auth/cambia-password", "/api/chat-ai/messaggio" };
 
     public async Task InvokeAsync(HttpContext context)
     {

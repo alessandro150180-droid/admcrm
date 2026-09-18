@@ -8,6 +8,9 @@ public class Ordine : BaseEntity
     public int ClienteId { get; set; }
     public Cliente Cliente { get; set; } = null!;
 
+    public int FornitoreId { get; set; }
+    public Fornitore Fornitore { get; set; } = null!;
+
     public DateTime DataOrdine { get; set; }
     public decimal Importo { get; set; }
     public int NumeroCucine { get; set; }

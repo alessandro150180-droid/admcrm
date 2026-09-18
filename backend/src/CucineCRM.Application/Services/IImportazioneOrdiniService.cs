@@ -12,5 +12,5 @@ public interface IImportazioneOrdiniService
     /// sia tra righe dello stesso file) e vengono scartati senza creare un nuovo Ordine.
     /// </summary>
     Task<ImportazioneRisultatoDto> ImportaOrdiniAsync(
-        Stream file, string nomeFile, string periodoCompetenza, CancellationToken ct = default);
+        Stream file, string nomeFile, string periodoCompetenza, int fornitoreId, CancellationToken ct = default);
 }

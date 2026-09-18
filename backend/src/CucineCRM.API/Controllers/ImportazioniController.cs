@@ -30,13 +30,14 @@ public class ImportazioniController : ControllerBase
     /// </summary>
     [HttpPost("ordini")]
     [RequestSizeLimit(20_000_000)] // 20 MB: sufficiente per un file Excel di import, evita upload abnormi
-    public async Task<IActionResult> ImportaOrdini(IFormFile file, [FromForm] string periodoCompetenza, CancellationToken ct)
+    public async Task<IActionResult> ImportaOrdini(
+        IFormFile file, [FromForm] string periodoCompetenza, [FromForm] int fornitoreId, CancellationToken ct)
     {
         if (file.Length == 0)
             return BadRequest(new { detail = "Il file è vuoto." });
 
         await using var stream = file.OpenReadStream();
-        var result = await _importazioneOrdiniService.ImportaOrdiniAsync(stream, file.FileName, periodoCompetenza, ct);
+        var result = await _importazioneOrdiniService.ImportaOrdiniAsync(stream, file.FileName, periodoCompetenza, fornitoreId, ct);
         return Ok(result);
     }
 
@@ -66,25 +67,25 @@ public class ImportazioniController : ControllerBase
     /// </summary>
     [HttpPost("fatturato-mensile")]
     [RequestSizeLimit(20_000_000)]
-    public async Task<IActionResult> ImportaFatturatoMensile(IFormFile file, CancellationToken ct)
+    public async Task<IActionResult> ImportaFatturatoMensile(IFormFile file, [FromForm] int fornitoreId, CancellationToken ct)
     {
         if (file.Length == 0)
             return BadRequest(new { detail = "Il file è vuoto." });
 
         await using var stream = file.OpenReadStream();
-        var result = await _importazioneFatturatoMensileService.ImportaFatturatoMensileAsync(stream, file.FileName, ct);
+        var result = await _importazioneFatturatoMensileService.ImportaFatturatoMensileAsync(stream, file.FileName, fornitoreId, ct);
         return Ok(result);
     }
 
     /// <summary>
-    /// Elimina gli ordini sintetici generati dall'import fatturato mensile per il mese/anno indicato
-    /// (soft-delete, lo storico resta in DB). Serve per correggere un import errato: dopo l'eliminazione
-    /// si può richiamare POST fatturato-mensile con il file corretto per ricreare solo quel periodo.
+    /// Elimina gli ordini sintetici generati dall'import fatturato mensile per fornitore/mese/anno
+    /// indicati (soft-delete, lo storico resta in DB). Serve per correggere un import errato: dopo
+    /// l'eliminazione si può richiamare POST fatturato-mensile con il file corretto per ricreare solo quel periodo.
     /// </summary>
-    [HttpDelete("fatturato-mensile/{anno:int}/{mese:int}")]
-    public async Task<IActionResult> EliminaFatturatoMensile(int anno, int mese, CancellationToken ct)
+    [HttpDelete("fatturato-mensile/{anno:int}/{mese:int}/{fornitoreId:int}")]
+    public async Task<IActionResult> EliminaFatturatoMensile(int anno, int mese, int fornitoreId, CancellationToken ct)
     {
-        var eliminati = await _importazioneFatturatoMensileService.EliminaFatturatoMensileAsync(anno, mese, ct);
+        var eliminati = await _importazioneFatturatoMensileService.EliminaFatturatoMensileAsync(anno, mese, fornitoreId, ct);
         return Ok(new { ordiniEliminati = eliminati });
     }
 }

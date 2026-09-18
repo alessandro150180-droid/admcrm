@@ -54,5 +54,6 @@ public record FiltriListaDto(
     string? Provincia = null,
     int? AgenteId = null,
     int? Anno = null,
-    int? Mese = null
+    int? Mese = null,
+    IReadOnlyList<int>? FornitoreIds = null // usato solo dalla lista Ordini, ignorato da Clienti/Attivita
 );

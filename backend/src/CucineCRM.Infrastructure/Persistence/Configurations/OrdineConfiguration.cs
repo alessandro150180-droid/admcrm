@@ -23,10 +23,16 @@ public class OrdineConfiguration : IEntityTypeConfiguration<Ordine>
         // Indici usati dalle dashboard per aggregazioni per data/cliente
         builder.HasIndex(o => o.DataOrdine);
         builder.HasIndex(o => o.ClienteId);
+        builder.HasIndex(o => o.FornitoreId);
 
         builder.HasOne(o => o.Cliente)
             .WithMany(c => c.Ordini)
             .HasForeignKey(o => o.ClienteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(o => o.Fornitore)
+            .WithMany(f => f.Ordini)
+            .HasForeignKey(o => o.FornitoreId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(o => o.Importazione)

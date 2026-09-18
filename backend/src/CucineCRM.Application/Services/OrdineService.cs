@@ -34,6 +34,8 @@ public class OrdineService : IOrdineService
             query = query.Where(o => o.DataOrdine.Year == filtri.Anno.Value);
         if (filtri.Mese.HasValue)
             query = query.Where(o => o.DataOrdine.Month == filtri.Mese.Value);
+        if (filtri.FornitoreIds is { Count: > 0 })
+            query = query.Where(o => filtri.FornitoreIds.Contains(o.FornitoreId));
 
         var totale = await _queryExecutor.CountAsync(query, ct);
 
@@ -42,7 +44,7 @@ public class OrdineService : IOrdineService
             .Skip((filtri.Pagina - 1) * filtri.Dimensione)
             .Take(filtri.Dimensione)
             .Select(o => new OrdineDto(
-                o.Id, o.ClienteId, o.Cliente.RagioneSociale, o.DataOrdine, o.Importo,
+                o.Id, o.ClienteId, o.Cliente.RagioneSociale, o.FornitoreId, o.Fornitore.Nome, o.DataOrdine, o.Importo,
                 o.NumeroCucine, o.NumeroElettrodomestici, o.NumeroComplementi, o.StatoOrdine,
                 o.RiferimentoEsterno)), ct);
 
@@ -62,7 +64,7 @@ public class OrdineService : IOrdineService
         if (!await _scoping.PuoAccedereAdAgenteAsync(cliente.AgenteId, ct))
             throw new ForbiddenAccessException("Non hai accesso a questo ordine.");
 
-        return MapToDto(ordine, cliente.RagioneSociale);
+        return await MapToDtoAsync(ordine, cliente.RagioneSociale, ct);
     }
 
     public async Task<OrdineDto> CreaAsync(CreaOrdineDto request, CancellationToken ct = default)
@@ -72,6 +74,9 @@ public class OrdineService : IOrdineService
 
         if (!await _scoping.PuoAccedereAdAgenteAsync(cliente.AgenteId, ct))
             throw new ForbiddenAccessException("Non puoi creare ordini per un cliente che non gestisci.");
+
+        var fornitore = await _unitOfWork.Fornitori.GetByIdAsync(request.FornitoreId, ct)
+            ?? throw new NotFoundException(nameof(Fornitore), request.FornitoreId);
 
         if (!string.IsNullOrWhiteSpace(request.RiferimentoEsterno))
         {
@@ -83,6 +88,7 @@ public class OrdineService : IOrdineService
         var ordine = new Ordine
         {
             ClienteId = request.ClienteId,
+            FornitoreId = request.FornitoreId,
             DataOrdine = request.DataOrdine,
             Importo = request.Importo,
             NumeroCucine = request.NumeroCucine,
@@ -95,7 +101,7 @@ public class OrdineService : IOrdineService
         await _unitOfWork.Ordini.AddAsync(ordine, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return MapToDto(ordine, cliente.RagioneSociale);
+        return MapToDto(ordine, cliente.RagioneSociale, fornitore.Nome);
     }
 
     public async Task<OrdineDto> AggiornaStatoAsync(int ordineId, AggiornaStatoOrdineDto request, CancellationToken ct = default)
@@ -109,7 +115,7 @@ public class OrdineService : IOrdineService
         _unitOfWork.Ordini.Update(ordine);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        return MapToDto(ordine, cliente.RagioneSociale);
+        return await MapToDtoAsync(ordine, cliente.RagioneSociale, ct);
     }
 
     private async Task<(Ordine Ordine, Cliente Cliente)> CaricaOrdineEClienteAsync(int ordineId, CancellationToken ct)
@@ -123,7 +129,14 @@ public class OrdineService : IOrdineService
         return (ordine, cliente);
     }
 
-    private static OrdineDto MapToDto(Ordine o, string clienteRagioneSociale) => new(
-        o.Id, o.ClienteId, clienteRagioneSociale, o.DataOrdine, o.Importo,
+    // Il repository restituisce l'Ordine senza la navigazione Fornitore popolata: va caricato a parte.
+    private async Task<OrdineDto> MapToDtoAsync(Ordine o, string clienteRagioneSociale, CancellationToken ct)
+    {
+        var fornitore = await _unitOfWork.Fornitori.GetByIdAsync(o.FornitoreId, ct);
+        return MapToDto(o, clienteRagioneSociale, fornitore?.Nome ?? string.Empty);
+    }
+
+    private static OrdineDto MapToDto(Ordine o, string clienteRagioneSociale, string fornitoreNome) => new(
+        o.Id, o.ClienteId, clienteRagioneSociale, o.FornitoreId, fornitoreNome, o.DataOrdine, o.Importo,
         o.NumeroCucine, o.NumeroElettrodomestici, o.NumeroComplementi, o.StatoOrdine, o.RiferimentoEsterno);
 }

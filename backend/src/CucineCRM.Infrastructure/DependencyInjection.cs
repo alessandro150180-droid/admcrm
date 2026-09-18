@@ -2,6 +2,7 @@ using System.Text;
 using CucineCRM.Application.Interfaces;
 using CucineCRM.Application.Services;
 using CucineCRM.Infrastructure.Auth;
+using CucineCRM.Infrastructure.ChatAi;
 using CucineCRM.Infrastructure.GoogleCalendar;
 using CucineCRM.Infrastructure.Import;
 using CucineCRM.Infrastructure.Persistence;
@@ -49,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IClienteService, ClienteService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IOrdineService, OrdineService>();
+        services.AddScoped<IFornitoreService, FornitoreService>();
         services.AddScoped<IAttivitaService, AttivitaService>();
         services.AddScoped<INotaClienteService, NotaClienteService>();
         services.AddScoped<IObiettivoVenditaService, ObiettivoVenditaService>();
@@ -64,6 +66,11 @@ public static class DependencyInjection
         services.Configure<GoogleOAuthOptions>(configuration.GetSection(GoogleOAuthOptions.SectionName));
         services.AddHttpClient<IGoogleOAuthClient, GoogleOAuthClient>();
         services.AddScoped<IGoogleCalendarSyncService, GoogleCalendarSyncService>();
+
+        // --- ChatAI ---
+        services.Configure<AnthropicOptions>(configuration.GetSection(AnthropicOptions.SectionName));
+        services.AddScoped<IChatAiProvider, AnthropicChatClient>();
+        services.AddScoped<IChatAiService, ChatAiService>();
 
         var jwtSection = configuration.GetSection(JwtOptions.SectionName);
         var jwtOptions = jwtSection.Get<JwtOptions>() ?? new JwtOptions();

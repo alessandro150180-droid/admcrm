@@ -25,9 +25,11 @@ public class DashboardService : IDashboardService
         _currentUser = currentUser;
     }
 
-    public async Task<DashboardKpiDto> GetKpiPrincipaliAsync(IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default)
+    public async Task<DashboardKpiDto> GetKpiPrincipaliAsync(
+        IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null,
+        IReadOnlyList<int>? fornitoreIds = null, CancellationToken ct = default)
     {
-        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, ct);
+        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, fornitoreIds, ct);
 
         var ordiniMeseCorrente = await _queryExecutor.ToListAsync(ordiniQuery
             .Where(o => mesi.Contains(o.DataOrdine.Month) && o.DataOrdine.Year == anno), ct);
@@ -44,7 +46,9 @@ public class DashboardService : IDashboardService
         var ordineMedioCorrente = ordiniMeseCorrente.Count == 0 ? 0 : fatturatoCorrente / ordiniMeseCorrente.Count;
         var ordineMedioPrecedente = ordiniMesePrecedente.Count == 0 ? 0 : fatturatoPrecedente / ordiniMesePrecedente.Count;
 
-        // "Nuovi clienti" = clienti la cui DataInserimento cade nel mese/anno richiesto
+        // "Nuovi clienti" = clienti la cui DataInserimento cade nel mese/anno richiesto. Non ha
+        // senso filtrarlo per fornitore (un cliente non appartiene a un fornitore), quindi qui
+        // fornitoreIds non è applicato: resta scoping per ruolo + agente/cliente come prima.
         var clientiQuery = _unitOfWork.Clienti.Query();
         var agentiVisibili = await _scoping.GetAgentiVisibiliAsync(ct);
         if (agentiVisibili is not null)
@@ -67,9 +71,11 @@ public class DashboardService : IDashboardService
         );
     }
 
-    public async Task<IReadOnlyList<PuntoGraficoMensileDto>> GetFatturatoMensileAsync(int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default)
+    public async Task<IReadOnlyList<PuntoGraficoMensileDto>> GetFatturatoMensileAsync(
+        int anno, int? agenteId = null, int? clienteId = null,
+        IReadOnlyList<int>? fornitoreIds = null, CancellationToken ct = default)
     {
-        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, ct);
+        var ordiniQuery = await GetOrdiniScopedQueryAsync(agenteId, clienteId, fornitoreIds, ct);
 
         // Include anche i due anni precedenti (quando ci sono dati) per permettere il confronto
         // anno su anno nel grafico, non solo l'anno selezionato.
@@ -92,10 +98,12 @@ public class DashboardService : IDashboardService
     /// <summary>
     /// Fatturato e provvigione per cliente nei mesi/anno indicati: mostra l'intero portafoglio clienti
     /// dell'agente (anche quelli senza ordini nel periodo, con fatturato 0) oppure un singolo cliente
-    /// se <paramref name="clienteId"/> è specificato.
+    /// se <paramref name="clienteId"/> è specificato. Se <paramref name="fornitoreIds"/> è specificato,
+    /// il fatturato riportato è ristretto a quei fornitori.
     /// </summary>
     public async Task<IReadOnlyList<ProvvigioneClienteDto>> GetProvvigioniPerClienteAsync(
-        IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null, CancellationToken ct = default)
+        IReadOnlyList<int> mesi, int anno, int? agenteId = null, int? clienteId = null,
+        IReadOnlyList<int>? fornitoreIds = null, CancellationToken ct = default)
     {
         var agentiVisibili = await _scoping.GetAgentiVisibiliAsync(ct);
 
@@ -122,8 +130,12 @@ public class DashboardService : IDashboardService
 
         // Un'unica query aggregata per il fatturato di tutti i clienti coinvolti nel periodo,
         // invece di interrogare il DB una volta per ogni cliente del portafoglio.
-        var fatturatiPerCliente = (await _queryExecutor.ToListAsync(_unitOfWork.Ordini.Query()
-            .Where(o => mesi.Contains(o.DataOrdine.Month) && o.DataOrdine.Year == anno && idClienti.Contains(o.ClienteId))
+        var fatturatoQuery = _unitOfWork.Ordini.Query()
+            .Where(o => mesi.Contains(o.DataOrdine.Month) && o.DataOrdine.Year == anno && idClienti.Contains(o.ClienteId));
+        if (fornitoreIds is { Count: > 0 })
+            fatturatoQuery = fatturatoQuery.Where(o => fornitoreIds.Contains(o.FornitoreId));
+
+        var fatturatiPerCliente = (await _queryExecutor.ToListAsync(fatturatoQuery
             .GroupBy(o => o.ClienteId)
             .Select(g => new { ClienteId = g.Key, Totale = g.Sum(o => o.Importo) }), ct))
             .ToDictionary(f => f.ClienteId, f => f.Totale);
@@ -152,9 +164,10 @@ public class DashboardService : IDashboardService
 
     /// <summary>
     /// Restituisce la query sugli Ordini già filtrata secondo lo scope di visibilità dell'utente corrente
-    /// (via Cliente.AgenteId), più l'eventuale filtro esplicito per agente passato come parametro.
+    /// (via Cliente.AgenteId), più gli eventuali filtri espliciti per agente/cliente/fornitore.
     /// </summary>
-    private async Task<IQueryable<Ordine>> GetOrdiniScopedQueryAsync(int? agenteId, int? clienteId, CancellationToken ct)
+    private async Task<IQueryable<Ordine>> GetOrdiniScopedQueryAsync(
+        int? agenteId, int? clienteId, IReadOnlyList<int>? fornitoreIds, CancellationToken ct)
     {
         var agentiVisibili = await _scoping.GetAgentiVisibiliAsync(ct);
 
@@ -168,6 +181,9 @@ public class DashboardService : IDashboardService
 
         if (clienteId.HasValue)
             query = query.Where(o => o.ClienteId == clienteId.Value);
+
+        if (fornitoreIds is { Count: > 0 })
+            query = query.Where(o => fornitoreIds.Contains(o.FornitoreId));
 
         return query;
     }

@@ -6,6 +6,8 @@ public record OrdineDto(
     int Id,
     int ClienteId,
     string ClienteRagioneSociale,
+    int FornitoreId,
+    string FornitoreNome,
     DateTime DataOrdine,
     decimal Importo,
     int NumeroCucine,
@@ -17,6 +19,7 @@ public record OrdineDto(
 
 public record CreaOrdineDto(
     int ClienteId,
+    int FornitoreId,
     DateTime DataOrdine,
     decimal Importo,
     int NumeroCucine,

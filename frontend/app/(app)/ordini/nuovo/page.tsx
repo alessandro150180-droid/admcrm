@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import type { ClienteDto } from "@/lib/types";
+import type { ClienteDto, FornitoreDto } from "@/lib/types";
 import { Button, ErrorBlock, Field, Input, PageHeader, Select } from "@/components/ui";
 import { messaggioErrore } from "@/lib/format";
 import { puoModificare, useAuth } from "@/lib/auth-context";
@@ -16,8 +16,10 @@ export default function NuovoOrdinePage() {
 
   const [clienti, setClienti] = useState<ClienteDto[]>([]);
   const [clientePreselezionato, setClientePreselezionato] = useState<ClienteDto | null>(null);
+  const [fornitori, setFornitori] = useState<FornitoreDto[]>([]);
   const [form, setForm] = useState({
     clienteId: clienteIdPreselezionato ?? "",
+    fornitoreId: "",
     dataOrdine: new Date().toISOString().slice(0, 10),
     importo: "", numeroCucine: "0", numeroElettrodomestici: "0", numeroComplementi: "0", riferimentoEsterno: "",
   });
@@ -34,6 +36,7 @@ export default function NuovoOrdinePage() {
         .then((r) => setClienti(r.elementi))
         .catch((err) => setErrore(messaggioErrore(err)));
     }
+    api.fornitori.lista().then(setFornitori).catch((err) => setErrore(messaggioErrore(err)));
   }, [clienteIdPreselezionato]);
 
   if (!puoModificare(utente?.ruolo)) {
@@ -46,8 +49,8 @@ export default function NuovoOrdinePage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!form.clienteId || !form.importo) {
-      setErrore("Cliente e importo sono obbligatori.");
+    if (!form.clienteId || !form.fornitoreId || !form.importo) {
+      setErrore("Cliente, fornitore e importo sono obbligatori.");
       return;
     }
     setErrore(null);
@@ -55,6 +58,7 @@ export default function NuovoOrdinePage() {
     try {
       const ordine = await api.ordini.crea({
         clienteId: Number(form.clienteId),
+        fornitoreId: Number(form.fornitoreId),
         dataOrdine: new Date(form.dataOrdine).toISOString(),
         importo: Number(form.importo),
         numeroCucine: Number(form.numeroCucine) || 0,
@@ -89,6 +93,15 @@ export default function NuovoOrdinePage() {
               ))}
             </Select>
           )}
+        </Field>
+
+        <Field label="Fornitore *">
+          <Select required value={form.fornitoreId} onChange={(e) => set("fornitoreId", e.target.value)}>
+            <option value="">Seleziona…</option>
+            {fornitori.map((f) => (
+              <option key={f.id} value={f.id}>{f.nome}</option>
+            ))}
+          </Select>
         </Field>
 
         <div className="grid grid-cols-2 gap-4">

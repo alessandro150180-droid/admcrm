@@ -12,6 +12,7 @@ public interface IUnitOfWork
     IRepository<Agente> Agenti { get; }
     IRepository<Cliente> Clienti { get; }
     IRepository<Ordine> Ordini { get; }
+    IRepository<Fornitore> Fornitori { get; }
     IRepository<Importazione> Importazioni { get; }
     IRepository<Attivita> Attivita { get; }
     IRepository<NotaCliente> NoteCliente { get; }

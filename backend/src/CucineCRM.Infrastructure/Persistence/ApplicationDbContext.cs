@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Agente> Agenti => Set<Agente>();
     public DbSet<Cliente> Clienti => Set<Cliente>();
     public DbSet<Ordine> Ordini => Set<Ordine>();
+    public DbSet<Fornitore> Fornitori => Set<Fornitore>();
     public DbSet<Importazione> Importazioni => Set<Importazione>();
     public DbSet<Attivita> Attivita => Set<Attivita>();
     public DbSet<NotaCliente> NoteCliente => Set<NotaCliente>();

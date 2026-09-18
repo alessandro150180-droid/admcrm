@@ -53,6 +53,12 @@ export interface PagedResult<T> {
   totalePagine: number;
 }
 
+export interface FornitoreDto {
+  id: number;
+  nome: string;
+  attivo: boolean;
+}
+
 export interface AgenteDto {
   id: number;
   nome: string;
@@ -105,6 +111,8 @@ export interface OrdineDto {
   id: number;
   clienteId: number;
   clienteRagioneSociale: string;
+  fornitoreId: number;
+  fornitoreNome: string;
   dataOrdine: string;
   importo: number;
   numeroCucine: number;
@@ -222,6 +230,15 @@ export interface AuditLogDto {
   entitaId: number;
   azione: string;
   dataCreazione: string;
+}
+
+export interface ChatAiMessaggioDto {
+  ruolo: "utente" | "assistente";
+  testo: string;
+}
+
+export interface ChatAiRispostaDto {
+  testo: string;
 }
 
 export interface ApiErrorBody {

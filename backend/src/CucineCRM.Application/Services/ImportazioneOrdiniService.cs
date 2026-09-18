@@ -25,10 +25,13 @@ public class ImportazioneOrdiniService : IImportazioneOrdiniService
     }
 
     public async Task<ImportazioneRisultatoDto> ImportaOrdiniAsync(
-        Stream file, string nomeFile, string periodoCompetenza, CancellationToken ct = default)
+        Stream file, string nomeFile, string periodoCompetenza, int fornitoreId, CancellationToken ct = default)
     {
         var utenteId = _currentUser.UtenteId
             ?? throw new AuthenticationException("Utente non autenticato.");
+
+        if (await _unitOfWork.Fornitori.GetByIdAsync(fornitoreId, ct) is null)
+            throw new ValidationAppException($"Nessun fornitore con id {fornitoreId}.");
 
         var righe = _spreadsheetReader.LeggiRighe(file);
 
@@ -97,6 +100,7 @@ public class ImportazioneOrdiniService : IImportazioneOrdiniService
             nuoviOrdini.Add(new Ordine
             {
                 ClienteId = clienteId,
+                FornitoreId = fornitoreId,
                 DataOrdine = dataOrdine,
                 Importo = importo,
                 NumeroCucine = ParseIntODefault(ValoreCella(riga, "NumeroCucine")),

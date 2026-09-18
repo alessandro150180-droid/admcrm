@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "@/lib/api";
-import type { ImportazioneRisultatoDto, RigaImportLogDto } from "@/lib/types";
-import { Button, Card, ErrorBlock, Field, Input, PageHeader, Table, Td, Th } from "@/components/ui";
+import type { FornitoreDto, ImportazioneRisultatoDto, RigaImportLogDto } from "@/lib/types";
+import { Button, Card, ErrorBlock, Field, Input, PageHeader, Select, Table, Td, Th } from "@/components/ui";
 import { messaggioErrore } from "@/lib/format";
 import { isSoloDirezione, useAuth } from "@/lib/auth-context";
 
@@ -26,9 +26,15 @@ export default function ImportPage() {
   const [tipo, setTipo] = useState<TipoImport>("ordini");
   const [file, setFile] = useState<File | null>(null);
   const [periodo, setPeriodo] = useState(new Date().toISOString().slice(0, 7));
+  const [fornitoreId, setFornitoreId] = useState("");
+  const [fornitori, setFornitori] = useState<FornitoreDto[]>([]);
   const [risultato, setRisultato] = useState<ImportazioneRisultatoDto | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
   const [inviando, setInviando] = useState(false);
+
+  useEffect(() => {
+    api.fornitori.lista().then(setFornitori).catch((err) => setErrore(messaggioErrore(err)));
+  }, []);
 
   if (!isSoloDirezione(utente?.ruolo)) {
     return <ErrorBlock message="Non hai i permessi per importare dati da Excel." />;
@@ -37,6 +43,7 @@ export default function ImportPage() {
   function cambiaTipo(nuovo: TipoImport) {
     setTipo(nuovo);
     setFile(null);
+    setFornitoreId("");
     setRisultato(null);
     setErrore(null);
   }
@@ -47,15 +54,19 @@ export default function ImportPage() {
       setErrore("Seleziona un file .xlsx.");
       return;
     }
+    if (tipo !== "clienti" && !fornitoreId) {
+      setErrore("Seleziona il fornitore a cui appartiene questo fatturato.");
+      return;
+    }
     setErrore(null);
     setInviando(true);
     setRisultato(null);
     try {
       const esito = tipo === "ordini"
-        ? await api.importazioni.importaOrdini(file, periodo)
+        ? await api.importazioni.importaOrdini(file, periodo, Number(fornitoreId))
         : tipo === "clienti"
           ? await api.importazioni.importaClienti(file, periodo)
-          : await api.importazioni.importaFatturatoMensile(file);
+          : await api.importazioni.importaFatturatoMensile(file, Number(fornitoreId));
       setRisultato(esito);
     } catch (err) {
       setErrore(messaggioErrore(err));
@@ -93,6 +104,16 @@ export default function ImportPage() {
           {tipo !== "fatturato-mensile" && (
             <Field label="Periodo di competenza">
               <Input type="month" value={periodo} onChange={(e) => setPeriodo(e.target.value)} className="w-40" />
+            </Field>
+          )}
+          {tipo !== "clienti" && (
+            <Field label="Fornitore">
+              <Select value={fornitoreId} onChange={(e) => setFornitoreId(e.target.value)} className="w-40">
+                <option value="">Seleziona…</option>
+                {fornitori.map((f) => (
+                  <option key={f.id} value={f.id}>{f.nome}</option>
+                ))}
+              </Select>
             </Field>
           )}
           <Button type="submit" disabled={inviando}>{inviando ? "Importazione in corso…" : "Importa"}</Button>
